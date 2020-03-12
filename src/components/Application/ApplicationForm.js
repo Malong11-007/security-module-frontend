@@ -92,23 +92,21 @@ const ApplicationForm = (props) => {
 
   return (
   	<Grid 
-  		container
-		  direction="row"
-		  justify="center"
-		  alignItems="center"
+  		justify="center"
   	>
-  			<form onSubmit={handleSubmit(onSubmit)}>
-				  <p style={{ color: "#007bff" }} className="h4 text-left py-4">
+  			<form onSubmit={handleSubmit(onSubmit)} style={{minWidth:'100%'}}>
+				  <p style={{ color: "#4252a7", textAlign:'center' }} className="h4 text-left py-4">
 				    APPLICATION
 				  </p>
 
 				  <TextField
 				    id="standard-search"
 				    autoComplete="off"
+				    fullWidth
+            defaultValue={props.type === "update" ? props.record.Application_Name : ""}
 				    type="search"
 				    name="Application_Name"
-				    style={{ marginBottom: "5px", width: "50%" }}
-				    valueDefault={props.type === "update" ? props.record.Application_Name : ""}
+				    style={{ marginBottom: "5px" }}
 				    inputRef={register({ required: true, maxLength: 255 })}
 				    label="Application Name"
 				  />
@@ -127,9 +125,10 @@ const ApplicationForm = (props) => {
 				    id="standard-search"
 				    type="search"
 				    autoComplete="off"
+				    fullWidth
 				    name="Application_Short_Name"
-				    style={{ marginBottom: "5px", marginTop: "5px", width: "50%" }}
-				    valueDefault={
+				    style={{ marginBottom: "5px", marginTop: "5px" }}
+				    defaultValue={
 				      props.type === "update" ? props.record.Application_Short_Name : ""
 				    }
 				    inputRef={register({ required: true, maxLength: 255 })}
@@ -153,9 +152,10 @@ const ApplicationForm = (props) => {
 				    id="standard-search"
 				    type="search"
 				    autoComplete="off"
+				    fullWidth
 				    name="Application_Desc"
-				    style={{ marginBottom: "15px", marginTop: "5px", width: "50%" }}
-				    valueDefault={props.type === "update" ? props.record.Application_Desc : ""}
+				    style={{ marginBottom: "15px", marginTop: "5px" }}
+				    defaultValue={props.type === "update" ? props.record.Application_Desc : ""}
 				    inputRef={register({ required: true, maxLength: 255 })}
 				    label="Application Description"
 				  />

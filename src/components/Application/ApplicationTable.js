@@ -16,30 +16,6 @@ const ApplicationTable = () => {
   const [record,setRecord] = useState();
   const [search,setSearch] = useState('');
 
-  const nextPage = () => {
-  	API.get(`/application/get?limit=${rowCount}&page=${parseInt(pageNumber)+1}&search=${search}`)
-  	.then(response => {
-  		setPageNumber(pageNumber+1);
-  		setApplication(response.data) 
-  		console.log(response)
-  	})
-  	.catch(err => {
-  		console.log(err)
-  	})
-  }
-
-  const previousPage = () => {
-  	API.get(`/application/get?limit=${rowCount}&page=${parseInt(pageNumber)-1}&search=${search}`)
-  	.then(response => {
-  		setPageNumber(pageNumber-1)
-  		setApplication(response.data) 
-  		console.log(response)
-  	})
-  	.catch(err => {
-  		console.log(err)
-  	})
-  }
-
   const columns = [
     {
       Header: "Application Name",
@@ -99,7 +75,26 @@ const ApplicationTable = () => {
       sortable: true,
       filterable: false
     }
-  ];
+  ]
+
+  const getApplications = () => {
+  	console.log(pageNumber)
+    API.get(`/application/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+      headers:{
+        "Content-Type" : "application/json"
+      }
+    })
+    .then(response => {
+      // console.log(responce.data);
+      if(response.data.results !== Application){
+        setApplication(response.data) 
+      }
+      // console.log(response.data.results)
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  }
 
   const onDelete = (item) => {
   	console.log(item)
@@ -121,42 +116,24 @@ const ApplicationTable = () => {
     }
   }
 
-  const getApplications = () => {
-    API.get(`/application/get?page=${pageNumber}&limit=${rowCount}&search=${search}` , {
-      headers:{
-        "Content-Type" : "application/json"
-      }
-    })
-    .then(response => {
-      // console.log(responce.data);
-      if(response.data.results !== Application){
-        setApplication(response.data) 
-      }
-      console.log(response.data.results)
-    })
-    .catch(err => {
-      console.log(err);
-    })
-  }
-
-
-  useEffect(() => { // initializer
+	// initializer
+  useEffect(() => { 
     ReactModal.setAppElement('body')
     getApplications()
     // console.log(Application)
   },[]) // eslint-disable-line
 
+  //Checks for change in rowCount and PageNumber
   useEffect(() => {
   	// console.log(Application)
   	getApplications()
   }, [rowCount,pageNumber]) // eslint-disable-line
 
+
   //search bar change handler
   const handleChange = event => {
     setSearch(event.target.value);
   };
-
-
 
   const customStyles = {
     content: {
@@ -201,8 +178,7 @@ const ApplicationTable = () => {
       	pageNumber={pageNumber}
       	setPageNumber={setPageNumber}
       	totalPages={Application.totalPages}
-      	onNextPage={Application.hasOwnProperty('next') ? nextPage : null}
-      	onPreviousPage={Application.hasOwnProperty('previous') ? previousPage : null}
+      	newPage={getApplications}
       />
 
       {/* Modal for Update */}

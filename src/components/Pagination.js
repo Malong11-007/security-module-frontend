@@ -9,7 +9,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Pagination from '@material-ui/lab/Pagination';
 
 const CustomPagination = (props) => {
-	const [page, setPage] = React.useState(1);
 	/*
 		Props
 		1 -- rowCount - setRowCount for handling row per Page
@@ -22,12 +21,10 @@ const CustomPagination = (props) => {
   };
 
   const pageHandler = (event,value) => {
-  	if(page > value){
-  		props.onPreviousPage()
-  	} else {
-  		props.onNextPage()
+  	if(props.pageNumber !== value){
+			props.setPageNumber(value)
+			props.newPage()
   	}
-  	setPage(value)
   }
 
 	return (
@@ -38,7 +35,7 @@ const CustomPagination = (props) => {
 			<Pagination 
 		    	count={props.totalPages} 
 		    	size="large"
-		    	page={page} 
+		    	page={props.pageNumber} 
 		    	variant="outlined" color="primary"
 		    	onChange={pageHandler}
 		  />
