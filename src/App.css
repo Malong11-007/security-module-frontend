@@ -119,3 +119,47 @@
   font-weight: 400 !important;
   letter-spacing: 1px !important;
 }
+
+/* Change in PlaceHolder input tag */
+
+input[type="date"],input[type="datetime-local"]::before { 
+  content: attr(data-placeholder);
+  width: 100%;
+}
+
+input[type="date"],input[type="datetime-local"]:focus::before,
+input[type="date"],input[type="datetime-local"]:valid::before { display: none }
+
+/* table action buttons and Modal */
+
+.table_buttons {
+  fontSize: 1.2rem;
+  margin: 0px 15px;
+  cursor: pointer;
+}
+
+.table_edit {
+  color: #007bff;
+}
+
+.table_edit:hover {
+  color: #0056b2;
+}
+
+.table_delete {
+  color: #dc3545;
+}
+
+.table_delete:hover {
+  color: #b02a37;
+}
+
+.modal_cross {
+  color: #007bff;
+  margin-left: 96%;
+}
+
+.modal_cross:hover {
+  color: #0056b2;
+}
+

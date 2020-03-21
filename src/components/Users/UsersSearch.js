@@ -3,12 +3,13 @@ import API from '../../baseURL';
 import CustomPagination from '../Pagination';
 import ReactTable from 'react-table-6';
 import ReactModal from 'react-modal';
-import ApplicationForm from './ApplicationForm';
+import UsersForm from './UsersForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
+import { customStyles } from '../../style.js'
 
-const ApplicationTable = () => {
-  const [Application,setApplication] = useState([]);
+const UsersSearch = () => {
+  const [Users,setUsers] = useState([]);
   const [showModalUpdate,setShowModalUpdate] = useState(false);
   const [showModalInsert,setShowModalInsert] = useState(false);
   const [rowCount,setRowCount] = useState(10);
@@ -18,76 +19,93 @@ const ApplicationTable = () => {
 
   const columns = [
     {
-      Header: "Application Name",
-      accessor: "Application_Name",
+      Header: 'User_ID',
+      accessor: 'User_ID',
       sortable: true,
-      filterable: false
+      filterable: false,
+    },{
+      Header: 'Username',
+      accessor: 'User_Name',
+      sortable: true,
+      filterable: false,
+    },{
+      Header: 'User Status',
+      accessor: 'User_Status',
+      sortable: true,
+      filterable: false,
+    },{
+      Header: 'User Email',
+      accessor: 'User_Email',
+      sortable: true,
+      filterable: false,
+    },{
+      Header: 'User Mobile',
+      accessor: 'User_Mobile',
+      sortable: true,
+      filterable: false,
+    },{
+      Header: 'Employee_ID',
+      accessor: 'Employee_ID',
+      sortable: true,
+      filterable: false,
+    },{
+      Header: 'Host ID Restric',
+      accessor: 'Host_ID_Restric',
+      sortable: true,
+      filterable: false,
+    },{
+      Header: 'Accout Locked Flag',
+      accessor: 'Accout_Locked_Flag',
+      sortable: true,
+      filterable: false,
+    },{
+      Header: 'HostID at Time Locked',
+      accessor: 'HostID_at_Time_Locked',
+      sortable: true,
+      filterable: false,
     },
     {
-      Header: "Application Short Name ",
-      accessor: "Application_Short_Name",
+      Header: 'Enabled Flag',
+      accessor: 'Enabled_Flag',
       sortable: true,
-      filterable: false
+      filterable: false,
+      
     },
     {
-      Header: "Application Description",
-      accessor: "Application_Desc",
-      sortable: true,
-      filterable: false
-    },
-    {
-      Header: "Enabled Flag",
-      accessor: "Enabled_Flag",
-      sortable: true,
-      filterable: false
-    },
-    {
-      Header: "Actions",
-      Cell: props => {
-        return (
-          <div style={{ textAlign: "center" }}>
-            <i
-              className="fas fa-edit"
-              style={{
-                color: "#007bff",
-                fontSize: "1.2rem",
-                margin: "0px 15px"
-              }}
-              onClick={() => {
-                setRecord(props.original);
-                setShowModalUpdate(true);
-              }}
-            >
-            </i>
-            <i
-              className="fas fa-trash"
-              style={{
-                color: "#dc3545",
-                fontSize: "1.2rem",
-                margin: "0px 15px"
-              }}
-              onClick={() => onDelete(props.original)}
-            >
-            </i>
-          </div>
-        );
+      Header: 'Actions',
+      Cell : props => {
+      	return(
+        <div style={{ textAlign: "center" }}>
+					<i
+						className="fas fa-edit table_buttons table_edit"
+						onClick={() => {
+							setRecord(props.original);
+							setShowModalUpdate(true);
+						}}
+					></i>
+					<i
+						className="fas fa-trash table_buttons table_delete"
+						onClick={() => onDelete(props.original)}
+					></i>
+				</div>
+        )      
       },
       sortable: true,
-      filterable: false
+      filterable: false,
     }
   ]
-
-  const getApplications = () => {
+ 
+  const getUsers = () => {
   	console.log(pageNumber)
-    API.get(`/application/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/users/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
     })
     .then(response => {
       // console.log(responce.data);
-      if(response.data.results !== Application){
-        setApplication(response.data) 
+      if(response.data.results !== Users){
+        setUsers(response.data) 
       }
       // console.log(response.data.results)
     })
@@ -98,15 +116,15 @@ const ApplicationTable = () => {
 
   const onDelete = (item) => {
   	console.log(item)
-    if (window.confirm("Are You Sure Want To Delete This Application") === true) {
-      API.delete(`/application/delete/${item.Application_ID}`,{
+    if (window.confirm("Are You Sure Want To Delete This Role") === true) {
+      API.delete(`/users/delete/${item.User_ID}`,{
         header: {
           "Content-Type": "application/json"
         }
       })
       .then(function(response) {
-        console.log(response);
-        getApplications();
+        // console.log(response);
+        getUsers();
       })
       .catch(function(error) {
         console.log(error);
@@ -119,31 +137,19 @@ const ApplicationTable = () => {
 	// initializer
   useEffect(() => { 
     ReactModal.setAppElement('body')
-    getApplications()
+    getUsers()
     // console.log(Application)
   },[]) // eslint-disable-line
 
   //Checks for change in rowCount and PageNumber
   useEffect(() => {
   	// console.log(Application)
-  	getApplications()
+  	getUsers()
   }, [rowCount,pageNumber]) // eslint-disable-line
-
 
   //search bar change handler
   const handleChange = event => {
     setSearch(event.target.value);
-  };
-
-  const customStyles = {
-    content: {
-      top: "50%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      width: "60%",
-      transform: "translate(-50%, -50%)"
-    }
   };
 
   return (
@@ -159,11 +165,9 @@ const ApplicationTable = () => {
         </Button>
       </div>
 
-      <SearchBar search={search} handleChange={handleChange} onSearch={getApplications}/>
-      
-      {/* React Table */}
+      <SearchBar search={search} handleChange={handleChange} onSearch={getUsers}/>
       <ReactTable
-        data={Application.results}
+        data={Users.results}
         columns={columns}
         noDataText={"Loading..."}
         showPagination={false}
@@ -172,42 +176,38 @@ const ApplicationTable = () => {
         	setRowCount(size)
         }}
       />
+
       <CustomPagination
       	rowCount={rowCount}
       	setRowCount={setRowCount}
       	pageNumber={pageNumber}
       	setPageNumber={setPageNumber}
-      	totalPages={Application.totalPages}
-      	newPage={getApplications}
+      	totalPages={Users.totalPages}
+      	newPage={getUsers}
       />
 
       {/* Modal for Update */}
       <ReactModal
         isOpen={showModalUpdate}
+        shouldCloseOnOverlayClick={false}
         onRequestClose={() => {
           setShowModalUpdate(false);
           setRecord(null);
-          getApplications();
+          getUsers();
         }}
         style={customStyles}
         ariaHideApp={true}
       >
         <div>
           <i
-            className="fas fa-times"
-            style={{
-              color: "#007bff",
-              fontSize: "1.2rem",
-              margin: "0px 15px",
-              marginLeft: "96%"
-            }}
+            className="fas fa-times table_buttons modal_cross"
             onClick={() => setShowModalUpdate(false)}
           ></i>
-          <ApplicationForm
+          <UsersForm
             type="update"
             record={record}
             onClose={setShowModalUpdate}
-            getApplications={getApplications}
+            getUsers={getUsers}
           />
           
         </div>
@@ -216,35 +216,28 @@ const ApplicationTable = () => {
       {/* Modal for Insert */}
       <ReactModal
         isOpen={showModalInsert}
+        shouldCloseOnOverlayClick={false}
         onRequestClose={() => {
           setShowModalInsert(false);
-          getApplications();
+          getUsers();
         }}
         style={customStyles}
         ariaHideApp={true}
       >
         <div>
           <i
-            className="fas fa-times"
-            style={{
-              color: "#007bff",
-              fontSize: "1.2rem",
-              margin: "0px 15px",
-              marginLeft: "96%"
-            }}
+            className="fas fa-times table_buttons modal_cross"
             onClick={() => setShowModalInsert(false)}
           ></i>
-          <ApplicationForm
+          <UsersForm
             type="insert"
             onClose={setShowModalInsert}
-            getApplications={getApplications}
+            getUsers={getUsers}
           />
         </div>
-      </ReactModal>
+      </ReactModal> 
     </div>
-  );
+  )
 }
 
-
-
-export default ApplicationTable
+export default UsersSearch
