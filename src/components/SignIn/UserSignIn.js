@@ -13,6 +13,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useForm } from 'react-hook-form'
+import API from "../../baseURL"; 
 
 
 
@@ -44,7 +45,23 @@ import { useForm } from 'react-hook-form'
        
         const onSubmit = data => {
           console.log(data);
-         };
+
+          API.post("/login", data, {
+            header: {
+              "Content-Type": "application/json"
+            }
+          })
+          
+          .then(function(response) {
+            console.log(response);
+
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+        };
+      
+        
         
         return (
           <form onSubmit={handleSubmit(onSubmit)}>
