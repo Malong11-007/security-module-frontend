@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import API from "../../baseURL"; 
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import swal from 'sweetalert';
 
 const RolesFormsForm = (props) => {
   const { register, errors,  handleSubmit } = useForm()
@@ -38,6 +39,24 @@ const RolesFormsForm = (props) => {
 		})
 		.then(function(response) {
 			console.log(response);
+			// swal (Success)
+			if(response.status === 200)
+			{
+			  swal("Submited", "Your New RolesForms's Body Is Successfully Inserted", "success");
+			}
+			//
+			  // swal (validate)
+			  else if(response.status === 403)
+			  {
+			  swal("Not Submited", "Your New RolesForms's Body Is Missing Or Validate", "warning");
+			  }
+			  //
+			  // swal (error)
+			  else if(response.status === 400)
+			  {
+				  swal("Not Submited", "Your New RolesForms's Body Is not Submited Successfully ", "error");
+			  }
+			  //
 		})
 		.catch(function(error) {
 			console.log(error);
@@ -75,6 +94,24 @@ const RolesFormsForm = (props) => {
 			console.log(response);
 			props.onClose(false);
 			props.getRolesForms();
+			// swal (Success)
+			if(response.status === 200)
+			{
+			  swal("Submited", "Your New RolesForm's Body Is Successfully Updated", "success");
+			}
+			//
+			// swal (validate)
+			 else if(response.status === 403)
+			 {
+			   swal("Not Submited", "Your New RolesForm's Body Is Missing Or Validate", "warning");
+			 }
+			 //
+			 // swal (error)
+			 else if(response.status === 400)
+			 {
+				 swal("Not Submited", "Your New RolesForm's Body Is not Updated Successfully ", "error");
+			 }
+			 //
 		})
 		.catch(function(error) {
 			console.log(error);

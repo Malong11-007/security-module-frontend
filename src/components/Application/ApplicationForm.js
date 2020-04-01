@@ -4,7 +4,7 @@ import API from "../../baseURL";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-
+import swal from 'sweetalert';
 
 const ApplicationForm = (props) => {
   let newDate = new Date();
@@ -40,12 +40,30 @@ const ApplicationForm = (props) => {
       }
     })
     .then(function(response) {
-      // console.log(response);
       props.onClose(false);
-      props.getApplications();
+	  props.getApplications();
+	
+	  // swal (Success)
+	  if(response.status === 200)
+	  {
+		swal("Submited", "Your New Application's Body Is Successfully Inserted", "success");
+	  }
+	  //
+		// swal (validate)
+		else if(response.status === 403)
+		{
+		swal("Not Submited", "Your New Application's Body Is Missing Or Validate", "warning");
+		}
+		//
+		// swal (error)
+		else if(response.status === 400)
+		{
+			swal("Not Submited", "Your New Application's Body Is not Submited Successfully ", "error");
+		}
+		//
     })
     .catch(function(error) {
-      console.log(error);
+		console.log(error);
     });
   };
 
@@ -81,12 +99,32 @@ const ApplicationForm = (props) => {
       }
     })
     .then(function(response) {
-      // console.log(response);
       props.onClose(false);
-      props.getApplications();
+	  props.getApplications();
+
+	   // swal (Success)
+	   if(response.status === 200)
+	   {
+		 swal("Submited", "Your New Application's Body Is Successfully Updated", "success");
+	   }
+	   //
+	   // swal (validate)
+		else if(response.status === 403)
+		{
+		  swal("Not Submited", "Your New Application's Body Is Missing Or Validate", "warning");
+		}
+		//
+		// swal (error)
+		else if(response.status === 400)
+		{
+			swal("Not Submited", "Your New Application's Body Is not Updated Successfully ", "error");
+		}
+		//
     })
     .catch(function(error) {
-      console.log(error);
+	  console.log(error);
+	  
+	  
     });
   };
 
@@ -154,7 +192,7 @@ const ApplicationForm = (props) => {
 				    autoComplete="off"
 				    fullWidth
 				    name="Application_Desc"
-				    style={{ marginBottom: "15px", marginTop: "5px" }}
+				    style={{ marginBottom: "5px", marginTop: "5px" }}
 				    defaultValue={props.type === "update" ? props.record.Application_Desc : ""}
 				    inputRef={register({ required: true, maxLength: 255 })}
 				    label="Application Description"

@@ -7,6 +7,7 @@ import RolesModulesForm from './RolesModulesForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const RolesFormsSearch = () => {
   const [RolesModules,setRolesModules] = useState([]);
@@ -79,25 +80,51 @@ const RolesFormsSearch = () => {
       console.log(err);
     })
   }
-
+  
+    
   const onDelete = (item) => {
   	console.log(item)
-    if (window.confirm("Are You Sure Want To Delete This Role") === true) {
-      API.delete(`/roles-forms/delete/${item.Role_Form_ID}`,{
-        header: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(function(response) {
-        console.log(response);
-        getRolesModules();
-      })
-      .catch(function(error) {
-        console.log(error);
-      });
-    } else {
-      return;
-    }
+    swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this imaginary file!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        API.delete(`/roles-forms/delete/${item.Role_Form_ID}`,{
+          header: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(function(response) {
+          console.log(response);
+          getRolesModules();
+          
+        })
+        .catch(function(error) {
+          console.log(error);
+          // swal (validate)
+      if(error.status === 403)
+      {
+        swal("Not Deleted", "Your New Application's Body Is Missing Or Validate", "warning");
+      }                                                                                                      
+      //
+      // swal (error)
+      else if(error.status === 403)
+      {
+        swal("Not Deleted", "Your New Application's Body Is not Deleted Successfully ", "error");
+      }
+      //
+        });
+        swal("Poof! Your imaginary file has been deleted!", {
+          icon: "success",
+        });
+      } else {
+        swal("Your imaginary file is safe!");
+      }
+    });
   }
 
 	// initializer

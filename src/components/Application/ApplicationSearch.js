@@ -7,6 +7,7 @@ import ApplicationForm from './ApplicationForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const ApplicationSearch = () => {
   const [Application,setApplication] = useState([]);
@@ -88,23 +89,51 @@ const ApplicationSearch = () => {
   }
 
   const onDelete = (item) => {
-  	console.log(item)
-    if (window.confirm("Are You Sure Want To Delete This Application") === true) {
-      API.delete(`/application/delete/${item.Application_ID}`,{
-        header: {
-          "Content-Type": "application/json"
+    console.log(item)
+    
+          swal({
+        title: "Are you sure?",
+        text: "Once deleted, you will not be able to recover this imaginary file!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then((willDelete) => {
+        if (willDelete) {
+          API.delete(`/application/delete/${item.Application_ID}`,{
+            header: {
+              "Content-Type": "application/json"
+            }
+          })
+          .then(function(response) {
+            console.log(response);
+            getApplications();
+            
+          })
+          .catch(function(error) {
+            console.log(error);
+            // swal (validate)
+        if(error.status === 403)
+        {
+          swal("Not Deleted", "Your New Application's Body Is Missing Or Validate", "warning");
+        }                                                                                                      
+        //
+        // swal (error)
+        else if(error.status === 403)
+        {
+          swal("Not Deleted", "Your New Application's Body Is not Deleted Successfully ", "error");
         }
-      })
-      .then(function(response) {
-        console.log(response);
-        getApplications();
-      })
-      .catch(function(error) {
-        console.log(error);
+        //
+          });
+          swal("Poof! Your imaginary file has been deleted!", {
+            icon: "success",
+          });
+        } else {
+          swal("Your imaginary file is safe!");
+        }
       });
-    } else {
-      return;
-    }
+
+    
   }
 
 	// initializer

@@ -31,7 +31,7 @@ const PurchaseOrderHeader = (props) => {
     let month = newDate.getMonth() + 1;
     let year = newDate.getFullYear();
     let CompletDate = year+'-'+month+'-'+date;
-    
+
     const [Application,setApplication] = useState([]);
     const [showModalUpdate,setShowModalUpdate] = useState(false);
     const [showModalInsert,setShowModalInsert] = useState(false);
@@ -42,7 +42,7 @@ const PurchaseOrderHeader = (props) => {
     "Created_By" : 1,
     "Creation_Date" : CompletDate ,
     "Last_Updated_Date" : CompletDate ,
-    "Last_Updated_By" : 1
+    "Last_Updated_By" : 1 
     });
     
     const [rowCount,setRowCount] = useState(10);
