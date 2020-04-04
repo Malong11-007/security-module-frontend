@@ -1,19 +1,53 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from 'react-hook-form'
+import { useSelector, useDispatch } from 'react-redux';
 import API from "../../baseURL"; 
 import TextField from '@material-ui/core/TextField';
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
 import Button from '@material-ui/core/Button';
+import moment from 'moment';
 import swal from 'sweetalert';
 
 const RolesForm = (props) => {
-	const { register, errors,  handleSubmit } = useForm()
-  let newDate = new Date();
-  let date = newDate.getDate();
-  let month = newDate.getMonth() + 1;
-  let year = newDate.getFullYear();
-  let CompletDate = year+'-'+month+'-'+date;
-  
-	const onSubmit = data => {
+	const { Organization_ID } = useSelector(state => state.user)
+  const { register, errors, watch, handleSubmit, setValue } = useForm({
+	  defaultValues: {
+	    "Module_ID": props.type === 'update' ? props.record.Module_ID : "",
+	    "Role_ID": props.type === 'update' ? props.record.Role_ID : ""
+	  }
+	});
+  const watchValues = watch();
+	const [forms,setForms] = useState([]);
+	const [modules,setModules] = useState([]);
+	const [roles,setRoles] = useState([]);
+	const [ready,setReady] = useState(false);
+  const currentDate = moment();
+
+  useEffect(() => {
+  	register({name:"Role_ID"},{required:true})
+  	register({name:"Module_ID"},{required:true})
+  },[]) // eslint-disable-line
+
+  useEffect(() => {
+  	if(roles.length === 0){
+  		API.get(`/get/RMF/1`) ///get/RMF/${Organization_ID}
+			.then((response) => {
+				setForms(response.data.forms);
+				setModules(response.data.modules);
+				setRoles(response.data.roles);
+				setReady(true);
+			})
+			.catch((err) => {
+				console.log(err);
+				return;
+			});
+  	}
+  }, [roles]) // eslint-disable-line
+
+
+	const onSubmit = (data,e) => {
 		if (props.type === "insert") {
 			OnInsert(data);
 		} else {
@@ -21,171 +55,145 @@ const RolesForm = (props) => {
 		}
 	};
 
- 	/* INSERT FORM */
+	/* INSERT FORM FUNCTION */
 	const OnInsert = data => {
-		data["Enabled_Flag"] = data.Enabled_Flag === true ? "1" : "0";
-		data["Created_By"] = 1;
-		data["Creation_Date"] = CompletDate;
-		data["Last_Updated_Date"] = CompletDate;
-		data["Last_Updated_By"] = 1;
-		// console.log(data);
 
+		/* Additional Values to Form */
+		data = {
+			...data,
+			Organization_ID: 1,
+			Enabled_Flag:data.Enabled_Flag === true ? "1" : "Y",
+			Created_By: 1,
+			Creation_Date: currentDate.format('YYYY-MM-DD'),
+			Last_Updated_By: 1,
+			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
+		}
+		console.log(data);
 		API.post("/roles-modules/post", data, {
 			header: {
 				"Content-Type": "application/json"
 			}
 		})
 		.then(function(response) {
-			console.log(response);
-			// swal (Success)
+			// console.log(response);
 			if(response.status === 200)
-			{
-			  swal("Submited", "Your New RolesModule's Body Is Successfully Inserted", "success");
-			}
-			//
-			  // swal (validate)
-			  else if(response.status === 403)
-			  {
-			  swal("Not Submited", "Your New RolesModule's Body Is Missing Or Validate", "warning");
-			  }
-			  //
-			  // swal (error)
-			  else if(response.status === 400)
-			  {
-				  swal("Not Submited", "Your New RolesModule's Body Is not Submited Successfully ", "error");
-			  }
-			  //
+			  swal("New Record Created!","", "success");
+			props.onClose(false);
 		})
 		.catch(function(error) {
 			console.log(error);
+			if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+				swal("Entry Failed!",error.message, "error");
+ 			}
 		});
 	};
 
-	/* UPDATE FORM */
+	/* UPDATE FORM FUNCTION */
 	const OnUpdate = data => {
 		const {
 			Role_ID,
+			Role_Form_ID,
 			Module_ID,
-			Organization_ID,
-			Role_Module_ID,
+			Form_ID,
 			Enabled_Flag
 		} = props.record;
 		if (
 			data.Role_ID === Role_ID &&
 			data.Module_ID === Module_ID &&
-			data.Enabled_Flag === Enabled_Flag &&
-			data.Organization_ID === Organization_ID
+			(data.Enabled_Flag === true ? 1 : "Y") === Enabled_Flag &&
+			data.Form_ID === Form_ID
 		) {
 			alert("No Data Change To Be Noted");
 			return;
 		}
-		data["Enabled_Flag"] = data.Enabled_Flag === true ? "1" : "0";
-		data["Last_Updated_Date"] = CompletDate;
+		data["Enabled_Flag"] = data.Enabled_Flag === true ? "1" : "Y";
+		data["Last_Updated_Date"] = currentDate.format('YYYY-MM-DD HH:mm:ss');
 		data["Last_Updated_By"] = 1;
 
-		API.put(`/roles-modules/update/${Role_Module_ID}`, data, {
+		API.put(`/roles-modules/update/${Module_ID}`, data, {
 			header: {
 				"Content-Type": "application/json"
 			}
 		})
 		.then(function(response) {
-			console.log(response);
+			// console.log(response);
+			if(response.status === 200)
+			  swal("Record Updated!","", "success");
 			props.onClose(false);
-			props.getRolesModules();
-			 // swal (Success)
-			 if(response.status === 200)
-			 {
-			   swal("Submited", "Your New RolesModule's Body Is Successfully Updated", "success");
-			 }
-			 //
-			 // swal (validate)
-			  else if(response.status === 403)
-			  {
-				swal("Not Submited", "Your New RolesModule's Body Is Missing Or Validate", "warning");
-			  }
-			  //
-			  // swal (error)
-			  else if(response.status === 400)
-			  {
-				  swal("Not Submited", "Your New RolesModule's Body Is not Updated Successfully ", "error");
-			  }
-			  //
+			props.getRolesForms();
 		})
 		.catch(function(error) {
 			console.log(error);
+			if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+				swal(`Entry Failed!`, error.message, "error");
+ 			}
 		});
 	};
 
   return (
-    <div style = {{paddingLeft : "10%" }} >
-			<form onSubmit={handleSubmit(onSubmit)}>
+    <div style={{margin:'0 10px'}}>
+    {
+    	ready ?
+    	<form onSubmit={handleSubmit(onSubmit)}>
 				<p style={{ color: "#007bff" }} className="h4 text-left py-4">
-					MODULES-FORM
+					MODULES FORM
 				</p>
 
-				<TextField
-					id="standard-search"
-					type="Number"
+				<Autocomplete
+					id="disable-portal"
+					options={roles}
+					ref={register}
 					name="Role_ID"
-					style={{ marginBottom: "5px", width: "50%" }}
-					defaultValue={props.type === "update" ? props.record.Role_ID : ""}
-					inputRef={register({ required: true, maxLength: 255 })}
-					label="Role ID"
+					defaultValue={props.type === 'update' ? roles.find(role => role.Role_ID === props.record.Role_ID) : {}}
+					getOptionLabel={(option) => option.Role_Name || ""}
+					onChange={(event, value) => {if(value != null) setValue("Role_ID",value.Role_ID)}}
+					style={{ marginBottom: "20px" }}
+					renderInput={params => {
+	          return (
+	            <TextField
+	              {...params}
+	              label="Role List"
+	              name="Role_ID"
+	              fullWidth
+	              value={params}
+	            />
+	          );
+					}}
 				/>
 				{errors.Role_ID && errors.Role_ID.type === "required" && (
 					<p className="form_error">
-						{" "}
 						<i className="fas fa-exclamation-triangle"></i> This field is required
 					</p>
 				)}
-				{errors.Role_ID && errors.Role_ID.type === "maxLength" && (
-					<p className="form_error"> Maximum Length Allowed is 250 </p>
-				)}
-
-				<br />
-
-				<TextField
-					id="standard-search"
-					type="Number"
-					name="Organization_ID"
-					style={{ marginBottom: "5px", marginTop: "5px", width: "50%" }}
-					defaultValue={props.type === "update" ? props.record.Organization_ID : ""}
-					inputRef={register({ required: true, maxLength: 255 })}
-					label="Organizatin ID"
-				/>
-				{errors.Organization_ID && errors.Organization_ID.type === "required" && (
-					<p className="form_error">
-						{" "}
-						<i className="fas fa-exclamation-triangle"></i> This field is required
-					</p>
-				)}
-				{errors.Organization_ID && errors.Organization_ID.type === "maxLength" && (
-					<p className="form_error"> Maximum Length Allowed is 250 </p>
-				)}
-
-				<br />
-
-				<TextField
-					id="standard-search"
-					type="Number"
+				<Autocomplete
+					id="disable-portal"
+					options={modules}
+					ref={register}
 					name="Module_ID"
-					style={{ marginBottom: "15px", marginTop: "5px", width: "50%" }}
-					defaultValue={props.type === "update" ? props.record.Module_ID : ""}
-					inputRef={register({ required: true, maxLength: 255 })}
-					label="Module ID"
+					defaultValue={props.type === 'update' ? modules.find(module => module.Module_ID === props.record.Module_ID) : {}}
+					getOptionLabel={(option) => option.Module_Name || ""}
+					onChange={(event, value) => {if(value != null) setValue("Module_ID",value.Module_ID)}}
+					style={{ marginBottom: "20px" }}
+					renderInput={params => {
+	          return (
+	            <TextField
+	              {...params}
+	              label="Module List"
+	              name="Module_ID"
+	              fullWidth
+	              value={params}
+	            />
+	          );
+					}}
 				/>
 				{errors.Module_ID && errors.Module_ID.type === "required" && (
 					<p className="form_error">
-						{" "}
 						<i className="fas fa-exclamation-triangle"></i> This field is required
 					</p>
 				)}
-				{errors.Module_ID && errors.Module_ID.type === "maxLength" && (
-					<p className="form_error"> Maximum Length Allowed is 250 </p>
-				)}
 
 				<br />
-				<div class="checkbox">
+				<div className="checkbox">
 					<input
 						name="Enabled_Flag"
 						defaultChecked={
@@ -200,7 +208,7 @@ const RolesForm = (props) => {
 						className="checkbox__input"
 						ref={register}
 					/>
-					<label for="checkbox1" className="checkbox__label">
+					<label htmlFor="checkbox1" className="checkbox__label">
 						Enabled Flag
 					</label>
 				</div>
@@ -210,7 +218,10 @@ const RolesForm = (props) => {
 						{props.type === "insert" ? "Register" : "Update"}
 					</Button>
 				</div>
-			</form>
+			</form> : 
+			<h6>Loading</h6>
+    }
+     	
     </div>
   );
 };
