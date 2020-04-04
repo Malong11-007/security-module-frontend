@@ -1,55 +1,48 @@
 import React from "react";
 import { useForm } from 'react-hook-form'
+import { useSelector } from 'react-redux';
 import API from "../../baseURL"; 
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-
+import moment from 'moment';
+import swal from 'sweetalert';
 
 const ApplicationForm = (props) => {
-  let newDate = new Date();
-  let date = newDate.getDate();
-  let month = newDate.getMonth() + 1;
-  let year = newDate.getFullYear();
-  let CompletDate = year+'-'+month+'-'+date;
-
   const { register, errors,  handleSubmit } = useForm()
-  const onSubmit = data => {
-    // console.log(props);
-    if (props.type === "insert") {
-      OnInsert(data);
-    } else {
-      OnUpdate(data);
-    }
-  };
+  let currentDate = moment();
+	const { Organization_ID, User_ID } = useSelector(state => state.user)
 
- //ForInsert
-  const OnInsert = data => {
-    
-    data["Enabled_Flag"] = data.Enabled_Flag === true ? '1' : '0' // converting Enabled_Flag from boolean to String
-    data["Created_By"] = 1;
-    data["Creation_Date"] = CompletDate;
-    data["Last_Updated_Date"] = CompletDate;
-    data["Last_Updated_By"] = 1;
-    // console.log(data);
+  const OnInsert = data => { 
+    /* Additional Values to Form */
+  	data = {
+  		...data,
+  		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
+  		Created_By: 1, // temp Changed With User_ID
+			Creation_Date: currentDate.format('YYYY-MM-DD'),
+			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
+  	}
 
-    //Post
     API.post("/application/post", data, {
       header: {
         "Content-Type": "application/json"
       }
     })
     .then(function(response) {
-      // console.log(response);
+      if(response.status === 200)
+			  swal("New Record Created!","", "success");
       props.onClose(false);
       props.getApplications();
     })
     .catch(function(error) {
       console.log(error);
+      if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+				swal("Entry Failed!",error.message, "error");
+ 			}
     });
   };
 
-  //forUpdate
   const OnUpdate = data => {
     const {
       Application_ID,
@@ -69,10 +62,12 @@ const ApplicationForm = (props) => {
       return;
     }
 
-    data["Enabled_Flag"] = data.Enabled_Flag === true ? '1' : '0' // converting Enabled_Flag from boolean to String
-    data["Last_Updated_Date"] = CompletDate;
-    data["Last_Updated_By"] = 1;
-    // console.log(data)
+    data = {
+  		...data,
+  		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
+			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
+  	}
 
     //Update
     API.put(`/application/update/${Application_ID}`, data, {
@@ -82,18 +77,29 @@ const ApplicationForm = (props) => {
     })
     .then(function(response) {
       // console.log(response);
+      if(response.status === 200)
+			  swal("Record Updated!","", "success");
       props.onClose(false);
       props.getApplications();
     })
     .catch(function(error) {
       console.log(error);
+      if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+				swal("Entry Failed!",error.message, "error");
+ 			}
     });
   };
 
+  const onSubmit = data => {
+    if (props.type === "insert") {
+      OnInsert(data);
+    } else {
+      OnUpdate(data);
+    }
+  };
+
   return (
-  	<Grid 
-  		justify="center"
-  	>
+  	<Grid>
   			<form onSubmit={handleSubmit(onSubmit)} style={{minWidth:'100%'}}>
 				  <p style={{ color: "#4252a7", textAlign:'center' }} className="h4 text-left py-4">
 				    APPLICATION
@@ -106,13 +112,12 @@ const ApplicationForm = (props) => {
             defaultValue={props.type === "update" ? props.record.Application_Name : ""}
 				    type="search"
 				    name="Application_Name"
-				    style={{ marginBottom: "5px" }}
+				    style={{ marginBottom: "20px" }}
 				    inputRef={register({ required: true, maxLength: 255 })}
 				    label="Application Name"
 				  />
 				  {errors.Application_Name && errors.Application_Name.type === "required" && (
 				    <p className="form_error">
-				      {" "}
 				      <i className="fas fa-exclamation-triangle"></i> This field is required
 				    </p>
 				  )}
@@ -127,7 +132,7 @@ const ApplicationForm = (props) => {
 				    autoComplete="off"
 				    fullWidth
 				    name="Application_Short_Name"
-				    style={{ marginBottom: "5px", marginTop: "5px" }}
+				    style={{ marginBottom: "20px", marginTop: "5px" }}
 				    defaultValue={
 				      props.type === "update" ? props.record.Application_Short_Name : ""
 				    }
@@ -137,7 +142,6 @@ const ApplicationForm = (props) => {
 				  {errors.Application_Short_Name &&
 				    errors.Application_Short_Name.type === "required" && (
 				      <p className="form_error">
-				        {" "}
 				        <i className="fas fa-exclamation-triangle"></i> This field is required
 				      </p>
 				    )}
@@ -154,14 +158,13 @@ const ApplicationForm = (props) => {
 				    autoComplete="off"
 				    fullWidth
 				    name="Application_Desc"
-				    style={{ marginBottom: "15px", marginTop: "5px" }}
+				    style={{ marginBottom: "20px", marginTop: "5px" }}
 				    defaultValue={props.type === "update" ? props.record.Application_Desc : ""}
 				    inputRef={register({ required: true, maxLength: 255 })}
 				    label="Application Description"
 				  />
 				  {errors.Application_Desc && errors.Application_Desc.type === "required" && (
 				    <p className="form_error">
-				      {" "}
 				      <i className="fas fa-exclamation-triangle"></i> This field is required
 				    </p>
 				  )}
@@ -170,7 +173,7 @@ const ApplicationForm = (props) => {
 				  )}
 
 				  <br />
-				  <div class="checkbox">
+				  <div className="checkbox">
 				    <input
 				      name="Enabled_Flag"
 				      defaultChecked={
@@ -185,7 +188,7 @@ const ApplicationForm = (props) => {
 				      className="checkbox__input"
 				      ref={register}
 				    />
-				    <label for="checkbox1" className="checkbox__label">
+				    <label htmlFor="checkbox1" className="checkbox__label">
 				      Enabled Flag
 				    </label>
 				  </div>

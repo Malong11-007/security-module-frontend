@@ -40,10 +40,12 @@ const ApplicationSearch = () => {
       Header: "Enabled Flag",
       accessor: "Enabled_Flag",
       sortable: true,
-      filterable: false
+      filterable: false,
+      width: 120
     },
     {
       Header: "Actions",
+      width: 200,
       Cell: props => {
         return (
           <div style={{ textAlign: "center" }}>
@@ -69,18 +71,15 @@ const ApplicationSearch = () => {
   ]
 
   const getApplications = () => {
-  	console.log(pageNumber)
     API.get(`/application/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
     })
     .then(response => {
-      // console.log(responce.data);
       if(response.data.results !== Application){
         setApplication(response.data) 
       }
-      // console.log(response.data.results)
     })
     .catch(err => {
       console.log(err);
@@ -88,7 +87,6 @@ const ApplicationSearch = () => {
   }
 
   const onDelete = (item) => {
-  	console.log(item)
     if (window.confirm("Are You Sure Want To Delete This Application") === true) {
       API.delete(`/application/delete/${item.Application_ID}`,{
         header: {
@@ -111,7 +109,6 @@ const ApplicationSearch = () => {
   useEffect(() => { 
     ReactModal.setAppElement('body')
     getApplications()
-    // console.log(Application)
   },[]) // eslint-disable-line
 
   //Checks for change in rowCount and PageNumber
