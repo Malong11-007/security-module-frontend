@@ -1,4 +1,5 @@
 import React,{ useState, useEffect } from 'react'
+import { useSelector } from 'react-redux';
 import API from '../../baseURL';
 import CustomPagination from '../Pagination';
 import ReactTable from 'react-table-6';
@@ -9,6 +10,7 @@ import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
 
 const RolesFormsSearch = () => {
+	const { Organization_ID } = useSelector(state => state.user)
   const [RolesModules,setRolesModules] = useState([]);
   const [showModalUpdate,setShowModalUpdate] = useState(false);
   const [showModalInsert,setShowModalInsert] = useState(false);
@@ -18,15 +20,22 @@ const RolesFormsSearch = () => {
   const [search,setSearch] = useState('');
 
   const columns = [
+ 	 {
+      Header: 'Role Module ID',
+      accessor: 'Role_Module_ID',
+      sortable: true,
+      filterable: false,
+      maxWidth: 100
+    },
     {
-      Header: 'Role_ID',
-      accessor: 'Role_ID',
+      Header: 'Role Name',
+      accessor: 'Role_Name',
       sortable: true,
       filterable: false,
     },
     {
-      Header: 'Module_ID',
-      accessor: 'Module_ID',
+      Header: 'Module Name',
+      accessor: 'Module_Name',
       sortable: true,
       filterable: false,
     },
@@ -63,7 +72,7 @@ const RolesFormsSearch = () => {
  
   const getRolesModules = () => {
   	console.log(pageNumber)
-    API.get(`/roles-forms/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/roles-modules/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
@@ -83,7 +92,7 @@ const RolesFormsSearch = () => {
   const onDelete = (item) => {
   	console.log(item)
     if (window.confirm("Are You Sure Want To Delete This Role") === true) {
-      API.delete(`/roles-forms/delete/${item.Role_Form_ID}`,{
+      API.delete(`/roles-modules/delete/${item.Role_Form_ID}`,{
         header: {
           "Content-Type": "application/json"
         }

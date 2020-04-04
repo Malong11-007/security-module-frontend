@@ -106,6 +106,7 @@ const UsersSearch = () => {
       // console.log(responce.data);
       if(response.data.results !== Users){
         setUsers(response.data) 
+        
       }
       // console.log(response.data.results)
     })
@@ -176,7 +177,6 @@ const UsersSearch = () => {
         	setRowCount(size)
         }}
       />
-
       <CustomPagination
       	rowCount={rowCount}
       	setRowCount={setRowCount}

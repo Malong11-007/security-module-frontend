@@ -19,14 +19,27 @@ const RolesFormsSearch = () => {
 
   const columns = [
     {
-      Header: 'Role_ID',
-      accessor: 'Role_ID',
+      Header: 'ID',
+      accessor: 'Role_Form_ID',
+      sortable: true,
+      filterable: false,
+      maxWidth: 100
+    },
+    {
+      Header: 'Role Name',
+      accessor: 'Role_Name',
       sortable: true,
       filterable: false,
     },
     {
-      Header: 'Form_ID',
-      accessor: 'Form_ID',
+      Header: 'Module Name',
+      accessor: 'Module_Name',
+      sortable: true,
+      filterable: false,
+    },
+    {
+      Header: 'Form Name',
+      accessor: 'Form_Name',
       sortable: true,
       filterable: false,
     },
@@ -35,10 +48,12 @@ const RolesFormsSearch = () => {
       accessor: 'Enabled_Flag',
       sortable: true,
       filterable: false,
+      width: 120
       
     },
     {
         Header: 'Actions',
+        maxWidth: 150,
         Cell : props =>
         {return(
           <div style={{ textAlign: "center" }}>
@@ -46,6 +61,7 @@ const RolesFormsSearch = () => {
 							className="fas fa-edit table_buttons table_edit"
 							onClick={() => {
 								setRecord(props.original);
+								console.log(props.original)
 								setShowModalUpdate(true);
 							}}
 						></i>
@@ -62,8 +78,7 @@ const RolesFormsSearch = () => {
   ]
  
   const getRolesForms = () => {
-  	console.log(pageNumber)
-    API.get(`/roles-forms/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/roles-forms/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
@@ -81,7 +96,6 @@ const RolesFormsSearch = () => {
   }
 
   const onDelete = (item) => {
-  	console.log(item)
     if (window.confirm("Are You Sure Want To Delete This Role") === true) {
       API.delete(`/roles-forms/delete/${item.Role_Form_ID}`,{
         header: {
@@ -89,7 +103,6 @@ const RolesFormsSearch = () => {
         }
       })
       .then(function(response) {
-        console.log(response);
         getRolesForms();
       })
       .catch(function(error) {
@@ -109,7 +122,6 @@ const RolesFormsSearch = () => {
 
   //Checks for change in rowCount and PageNumber
   useEffect(() => {
-  	// console.log(Application)
   	getRolesForms()
   }, [rowCount,pageNumber]) // eslint-disable-line
 
