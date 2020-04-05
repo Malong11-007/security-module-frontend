@@ -1,4 +1,5 @@
 import React,{ useState, useEffect } from 'react'
+import { useSelector } from 'react-redux';
 import API from '../../baseURL';
 import CustomPagination from '../Pagination';
 import ReactTable from 'react-table-6';
@@ -7,9 +8,11 @@ import RolesForm from './RolesForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const RolesSearch = () => {
   const [Roles,setRoles] = useState([]);
+  const { Organization_ID } = useSelector(state => state.user)
   const [showModalUpdate,setShowModalUpdate] = useState(false);
   const [showModalInsert,setShowModalInsert] = useState(false);
   const [rowCount,setRowCount] = useState(10);
@@ -35,10 +38,11 @@ const RolesSearch = () => {
       accessor: 'Enabled_Flag',
       sortable: true,
       filterable: false,
-      
+      width: 120
     },
     {
         Header: 'Actions',
+        width: 200,
         Cell : props =>
         {return(
           <div style={{ textAlign: "center" }}>
@@ -62,8 +66,8 @@ const RolesSearch = () => {
   ]
  
   const getRoles = () => {
-  	console.log(pageNumber)
-    API.get(`/roles/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+  	/* `/roles/get/4{Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` */
+    API.get(`/roles/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
@@ -81,7 +85,6 @@ const RolesSearch = () => {
   }
 
   const onDelete = (item) => {
-  	console.log(item)
     if (window.confirm("Are You Sure Want To Delete This Role") === true) {
       API.delete(`/roles/delete/${item.Role_ID}`,{
         header: {
@@ -89,12 +92,17 @@ const RolesSearch = () => {
         }
       })
       .then(function(response) {
-        console.log(response);
+        if(response.status === 200)
+				  swal("Record Deleted!","", "success");
         getRoles();
       })
       .catch(function(error) {
         console.log(error);
+        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+					swal("Deletion Failed!",error.message, "error");
+ 				}
       });
+
     } else {
       return;
     }
@@ -104,7 +112,6 @@ const RolesSearch = () => {
   useEffect(() => { 
     ReactModal.setAppElement('body')
     getRoles()
-    // console.log(Application)
   },[]) // eslint-disable-line
 
   //Checks for change in rowCount and PageNumber

@@ -7,6 +7,7 @@ import UsersForm from './UsersForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const UsersSearch = () => {
   const [Users,setUsers] = useState([]);
@@ -19,10 +20,11 @@ const UsersSearch = () => {
 
   const columns = [
     {
-      Header: 'User_ID',
+      Header: 'ID',
       accessor: 'User_ID',
       sortable: true,
       filterable: false,
+      width:100
     },{
       Header: 'Username',
       accessor: 'User_Name',
@@ -49,18 +51,13 @@ const UsersSearch = () => {
       sortable: true,
       filterable: false,
     },{
-      Header: 'Host ID Restric',
+      Header: 'Host ID Restriction',
       accessor: 'Host_ID_Restric',
       sortable: true,
       filterable: false,
     },{
-      Header: 'Accout Locked Flag',
-      accessor: 'Accout_Locked_Flag',
-      sortable: true,
-      filterable: false,
-    },{
-      Header: 'HostID at Time Locked',
-      accessor: 'HostID_at_Time_Locked',
+      Header: 'Account Loc. Flag',
+      accessor: 'Account_Locked_Flag',
       sortable: true,
       filterable: false,
     },
@@ -69,10 +66,11 @@ const UsersSearch = () => {
       accessor: 'Enabled_Flag',
       sortable: true,
       filterable: false,
-      
+      width:120
     },
     {
       Header: 'Actions',
+      width:200,
       Cell : props => {
       	return(
         <div style={{ textAlign: "center" }}>
@@ -96,19 +94,15 @@ const UsersSearch = () => {
   ]
  
   const getUsers = () => {
-  	console.log(pageNumber)
-    API.get(`/users/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/users/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
     })
     .then(response => {
-      // console.log(responce.data);
       if(response.data.results !== Users){
         setUsers(response.data) 
-        
       }
-      // console.log(response.data.results)
     })
     .catch(err => {
       console.log(err);
@@ -116,7 +110,6 @@ const UsersSearch = () => {
   }
 
   const onDelete = (item) => {
-  	console.log(item)
     if (window.confirm("Are You Sure Want To Delete This Role") === true) {
       API.delete(`/users/delete/${item.User_ID}`,{
         header: {
@@ -124,11 +117,15 @@ const UsersSearch = () => {
         }
       })
       .then(function(response) {
-        // console.log(response);
+				if(response.status === 200)
+				  swal("Record Deleted!","", "success");
         getUsers();
       })
       .catch(function(error) {
         console.log(error);
+        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+					swal("Deletion Failed!",error.message, "error");
+ 				}
       });
     } else {
       return;
@@ -139,12 +136,10 @@ const UsersSearch = () => {
   useEffect(() => { 
     ReactModal.setAppElement('body')
     getUsers()
-    // console.log(Application)
   },[]) // eslint-disable-line
 
   //Checks for change in rowCount and PageNumber
   useEffect(() => {
-  	// console.log(Application)
   	getUsers()
   }, [rowCount,pageNumber]) // eslint-disable-line
 

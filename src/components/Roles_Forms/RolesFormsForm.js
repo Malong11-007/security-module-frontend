@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import API from "../../baseURL"; 
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Button from '@material-ui/core/Button';
@@ -221,26 +223,23 @@ const RolesFormsForm = (props) => {
 					</p>
 				)}
 
-				<br />
-				<div className="checkbox">
-					<input
-						name="Enabled_Flag"
-						defaultChecked={
-							props.type === "update"
-								? props.record.Enabled_Flag === "1"
-									? true
-									: false
-								: false
-						}
-						type="checkbox"
-						id="checkbox1"
-						className="checkbox__input"
-						ref={register}
-					/>
-					<label htmlFor="checkbox1" className="checkbox__label">
-						Enabled Flag
-					</label>
-				</div>
+				<FormControlLabel
+	        control={
+	          <Checkbox
+	          	inputRef={register}
+	          	defaultChecked={
+	              props.type === "update"
+	                ? props.record.Enabled_Flag === "1"
+	                  ? true
+	                  : false
+	                : false
+	            }
+	            name="Enabled_Flag"
+	            color="primary"
+	          />
+	        }
+	        label="Enable Flag"
+	      />
 
 				<div>
 					<Button color="primary" variant="contained" type="submit">

@@ -7,6 +7,7 @@ import RolesFormsForm from './RolesFormsForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const RolesFormsSearch = () => {
   const [RolesForms,setRolesForms] = useState([]);
@@ -84,7 +85,7 @@ const RolesFormsSearch = () => {
       }
     })
     .then(response => {
-      // console.log(responce.data);
+      console.log(response.data);
       if(response.data.results !== RolesForms){
         setRolesForms(response.data) 
       }
@@ -103,10 +104,15 @@ const RolesFormsSearch = () => {
         }
       })
       .then(function(response) {
+        if(response.status === 200)
+				  swal("Record Deleted!","", "success");
         getRolesForms();
       })
       .catch(function(error) {
         console.log(error);
+        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+					swal("Deletion Failed!",error.message, "error");
+ 				}
       });
     } else {
       return;

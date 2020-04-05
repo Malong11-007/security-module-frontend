@@ -1,18 +1,52 @@
-import React from "react";
-import { useForm } from 'react-hook-form'
-import API from "../../baseURL"; 
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useSelector, useDispatch } from "react-redux";
+import axios from 'axios';
+import API from '../../baseURL.js';
+import TextField from "@material-ui/core/TextField";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import Button from "@material-ui/core/Button";
+import moment from "moment";
+import swal from "sweetalert";
 
 const UserRolesForm = (props) => {
-  const { register, errors,  handleSubmit } = useForm()
-  let newDate = new Date();
-  let date = newDate.getDate();
-  let month = newDate.getMonth() + 1;
-  let year = newDate.getFullYear();
-  let CompletDate = year+'-'+month+'-'+date;
-  
-	const onSubmit = data => {
+  const { Organization_ID, User_ID } = useSelector(state => state.user)
+	const { register, errors,  handleSubmit, setValue } = useForm({
+		defaultValues: {
+			User_ID: props.type === "update" ? props.record.User_ID : "",
+			Role_ID: props.type === "update" ? props.record.Role_ID : "",
+		},
+	});
+
+	const [users, setUsers] = useState([]);
+	const [roles, setRoles] = useState([]);
+	const [ready, setReady] = useState(false);
+	const currentDate = moment();
+
+	useEffect(() => {
+		register({ name: "Role_ID" }, { required: true });
+		register({ name: "User_ID" }, { required: true });
+	}, []); // eslint-disable-line
+
+	useEffect(() => {
+		if (roles.length === 0) {
+			axios.all([
+				API.get(`/get/RMF/1`),API.get("/users/get/names/1")
+			])
+			.then(axios.spread((url1,url2) => {
+				setRoles(url1.data.roles)
+				setUsers(url2.data)
+				setReady(true);
+			}))
+			.catch(err => {
+				console.log(err);
+			})
+		}
+	}, [roles]); // eslint-disable-line
+
+	const onSubmit = (data, e) => {
 		if (props.type === "insert") {
 			OnInsert(data);
 		} else {
@@ -20,159 +54,192 @@ const UserRolesForm = (props) => {
 		}
 	};
 
- 	/* INSERT FORM */
-	const OnInsert = data => {
-		data["Enabled_Flag"] = data.Enabled_Flag === true ? "1" : "0";
-		data["Created_By"] = 1;
-		data["Creation_Date"] = CompletDate;
-		data["Last_Updated_Date"] = CompletDate;
-		data["Last_Updated_By"] = 1;
-		// console.log(data);
+	const OnInsert = (data) => {
+		/* Additional Values to Form */
+		data = {
+			...data,
+			Organization_ID: 1, // Replace
+			Enabled_Flag: data.Enabled_Flag === true ? "1" : "Y",
+			Created_By: 1,
+			Creation_Date: currentDate.format("YYYY-MM-DD"),
+			Last_Updated_By: 1,
+			Last_Updated_Date: currentDate.format("YYYY-MM-DD HH:mm:ss"),
+		};
 
 		API.post("/user-roles/post", data, {
 			header: {
-				"Content-Type": "application/json"
-			}
+				"Content-Type": "application/json",
+			},
 		})
-		.then(function(response) {
-			/* TODO : Implement something to nofity on insertion or error message if fails */
-			console.log(response);
-		})
-		.catch(function(error) {
-			console.log(error);
-		});
+			.then(function(response) {
+				if (response.status === 200) swal("New Record Created!", "", "success");
+				props.onClose(false);
+				props.getUserRoles();
+			})
+			.catch(function(error) {
+				console.log(error);
+				if (
+					error.response.status === 400 ||
+					error.response.status === 403 ||
+					error.response.status === 404
+				) {
+					swal("Entry Failed!", error.message, "error");
+				}
+			});
 	};
 
-	/* UPDATE FORM */
-	const OnUpdate = data => {
+	/* UPDATE FORM FUNCTION */
+	const OnUpdate = (data) => {
 		const {
 			Role_ID,
-			User_ID,
 			User_Role_ID,
-			Organization_ID,
-			Enabled_Flag
+			Enabled_Flag,
 		} = props.record;
 		if (
 			data.Role_ID === Role_ID &&
 			data.User_ID === User_ID &&
-			data.Enabled_Flag === Enabled_Flag &&
-			data.Organization_ID === Organization_ID
+			(data.Enabled_Flag === true ? 1 : "Y") === Enabled_Flag
 		) {
 			alert("No Data Change To Be Noted");
 			return;
 		}
-		data["Enabled_Flag"] = data.Enabled_Flag === true ? "1" : "0";
-		data["Last_Updated_Date"] = CompletDate;
-		data["Last_Updated_By"] = 1;
+
+		data = {
+  		...data,
+  		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
+			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
+  	}
 
 		API.put(`/user-roles/update/${User_Role_ID}`, data, {
 			header: {
-				"Content-Type": "application/json"
-			}
+				"Content-Type": "application/json",
+			},
 		})
-		.then(function(response) {
-			/* TODO : Implement something to nofity on insertion or error message if fails */
-			console.log(response);
-			props.onClose(false);
-			props.getUserRoles();
-		})
-		.catch(function(error) {
-			console.log(error);
-		});
+			.then(function(response) {
+				// console.log(response);
+				if (response.status === 200) swal("Record Updated!", "", "success");
+				props.onClose(false);
+				props.getUserRoles();
+			})
+			.catch(function(error) {
+				console.log(error);
+				if (
+					error.response.status === 400 ||
+					error.response.status === 403 ||
+					error.response.status === 404
+				) {
+					swal(`Entry Failed!`, error.message, "error");
+				}
+			});
 	};
 
-  return (
-    <div style = {{paddingLeft : "10%" }} >
-		<form onSubmit={handleSubmit(onSubmit)}>
-			<p style={{ color: "#007bff" }} className="h4 text-left py-4">USER ROLES</p>
-			<TextField
-				id="standard-search"
-				type="Number"
-				name="User_ID"
-				style={{ marginBottom: "15px", marginTop: "5px", width: "50%" }}
-				defaultValue={props.type === "update" ? props.record.User_ID : ""}
-				inputRef={register({ required: true, maxLength: 255 })}
-				label="Module ID"
-			/>
-			{errors.User_ID && errors.User_ID.type === "required" && (
-				<p className="form_error">
-					{" "}
-					<i className="fas fa-exclamation-triangle"></i> This field is required
-				</p>
-			)}
-			{errors.User_ID && errors.User_ID.type === "maxLength" && (
-				<p className="form_error"> Maximum Length Allowed is 250 </p>
-			)}
-			<br />
+	return (
+		<div style={{ margin: "0 10px" }}>
+			{ready ? (
+				<form onSubmit={handleSubmit(onSubmit)}>
+					<p style={{ color: "#007bff" }} className="h4 text-left py-4">
+						USER ROLES
+					</p>
+					
+					<Autocomplete
+						id="disable-portal2"
+						options={users}
+						ref={register}
+						name="User_ID"
+						defaultValue={
+							props.type === "update"
+								? users.find((user) => user.User_ID === props.record.User_ID)
+								: {}
+						}
+						getOptionLabel={(option) => option.User_Name || ""}
+						onChange={(event, value) => {
+							if (value != null) setValue("User_ID", value.User_ID);
+						}}
+						style={{ marginBottom: "20px" }}
+						renderInput={(params) => {
+							return (
+								<TextField
+									{...params}
+									label="User List"
+									name="User_ID"
+									fullWidth
+									value={params}
+								/>
+							);
+						}}
+					/>
+					{errors.User_Name && errors.User_Name.type === "required" && (
+						<p className="form_error">
+							<i className="fas fa-exclamation-triangle"></i> This field is
+							required
+						</p>
+					)}
 
-			<TextField
-				id="standard-search"
-				type="Number"
-				name="Role_ID"
-				style={{ marginBottom: "5px", width: "50%" }}
-				defaultValue={props.type === "update" ? props.record.Role_ID : ""}
-				inputRef={register({ required: true, maxLength: 255 })}
-				label="Role ID"
-			/>
-			{errors.Role_ID && errors.Role_ID.type === "required" && (
-				<p className="form_error">
-					{" "}
-					<i className="fas fa-exclamation-triangle"></i> This field is required
-				</p>
-			)}
-			{errors.Role_ID && errors.Role_ID.type === "maxLength" && (
-				<p className="form_error"> Maximum Length Allowed is 250 </p>
-			)}
-			<br />
 
-			<TextField
-				id="standard-search"
-				type="Number"
-				name="Organization_ID"
-				style={{ marginBottom: "5px", marginTop: "5px", width: "50%" }}
-				defaultValue={props.type === "update" ? props.record.Organization_ID : ""}
-				inputRef={register({ required: true, maxLength: 255 })}
-				label="Organizatin ID"
-			/>
-			{errors.Organization_ID && errors.Organization_ID.type === "required" && (
-				<p className="form_error">
-					{" "}
-					<i className="fas fa-exclamation-triangle"></i> This field is required
-				</p>
-			)}
-			{errors.Organization_ID && errors.Organization_ID.type === "maxLength" && (
-				<p className="form_error"> Maximum Length Allowed is 250 </p>
-			)}
-			<br />
+					<Autocomplete
+						id="disable-portal1"
+						options={roles}
+						ref={register}
+						name="Role_ID"
+						defaultValue={
+							props.type === "update"
+								? roles.find((role) => role.Role_ID === props.record.Role_ID)
+								: {}
+						}
+						getOptionLabel={(option) => option.Role_Name || ""}
+						onChange={(event, value) => {
+							if (value != null) setValue("Role_ID", value.Role_ID);
+						}}
+						style={{ marginBottom: "20px" }}
+						renderInput={(params) => {
+							return (
+								<TextField
+									{...params}
+									label="Role List"
+									name="Role_ID"
+									fullWidth
+									value={params}
+								/>
+							);
+						}}
+					/>
+					{errors.Role_ID && errors.Role_ID.type === "required" && (
+						<p className="form_error">
+							<i className="fas fa-exclamation-triangle"></i> This field is
+							required
+						</p>
+					)}
 
-			<div class="checkbox">
-				<input
-					name="Enabled_Flag"
-					defaultChecked={
-						props.type === "update"
-							? props.record.Enabled_Flag === "1"
-								? true
-								: false
-							: false
-					}
-					type="checkbox"
-					id="checkbox1"
-					className="checkbox__input"
-					ref={register}
-				/>
-				<label for="checkbox1" className="checkbox__label">
-					Enabled Flag
-				</label>
-			</div>
+					<FormControlLabel
+		        control={
+		          <Checkbox
+		          	inputRef={register}
+		          	defaultChecked={
+		              props.type === "update"
+		                ? props.record.Enabled_Flag === "1"
+		                  ? true
+		                  : false
+		                : false
+		            }
+		            name="Enabled_Flag"
+		            color="primary"
+		          />
+		        }
+		        label="Enable Flag"
+		      />
 
-			<div>
-				<Button color="primary" variant="contained" type="submit">
-					{props.type === "insert" ? "Register" : "Update"}
-				</Button>
-			</div>
-		</form>
-    </div>
-  );
+					<div>
+						<Button color="primary" variant="contained" type="submit">
+							{props.type === "insert" ? "Register" : "Update"}
+						</Button>
+					</div>
+				</form>
+			) : (
+				<h6>Loading</h6>
+			)}
+		</div>
+	);
 };
 
 export default UserRolesForm;

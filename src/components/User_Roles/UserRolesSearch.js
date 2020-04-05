@@ -1,4 +1,5 @@
 import React,{ useState, useEffect } from 'react'
+import { useSelector } from 'react-redux';
 import API from '../../baseURL';
 import CustomPagination from '../Pagination';
 import ReactTable from 'react-table-6';
@@ -7,8 +8,10 @@ import UserRolesForm from './UserRolesForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const UserRolesSearch = () => {
+  const { Organization_ID } = useSelector(state => state.user)
   const [UserRoles,setUserRoles] = useState([]);
   const [showModalUpdate,setShowModalUpdate] = useState(false);
   const [showModalInsert,setShowModalInsert] = useState(false);
@@ -18,15 +21,22 @@ const UserRolesSearch = () => {
   const [search,setSearch] = useState('');
 
   const columns = [
-    {
-      Header: 'Role_ID',
-      accessor: 'Role_ID',
+  	{
+      Header: 'ID',
+      accessor: 'User_Role_ID',
+      sortable: true,
+      filterable: false,
+      width: 100
+    },
+ 		{
+      Header: 'Username',
+      accessor: 'User_Name',
       sortable: true,
       filterable: false,
     },
     {
-      Header: 'User_ID',
-      accessor: 'Form_ID',
+      Header: 'Role Name',
+      accessor: 'Role_Name',
       sortable: true,
       filterable: false,
     },
@@ -35,10 +45,11 @@ const UserRolesSearch = () => {
       accessor: 'Enabled_Flag',
       sortable: true,
       filterable: false,
-      
+      width: 120
     },
     {
       Header: 'Actions',
+      width: 200,
       Cell : props => {
       	return(
         <div style={{ textAlign: "center" }}>
@@ -62,18 +73,16 @@ const UserRolesSearch = () => {
   ]
  
   const getUserRoles = () => {
-  	console.log(pageNumber)
-    API.get(`/user-roles/get?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+  	// `/user-roles/get/${Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}`
+    API.get(`/user-roles/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
     })
     .then(response => {
-      // console.log(responce.data);
       if(response.data.results !== UserRoles){
         setUserRoles(response.data) 
       }
-      // console.log(response.data.results)
     })
     .catch(err => {
       console.log(err);
@@ -81,7 +90,6 @@ const UserRolesSearch = () => {
   }
 
   const onDelete = (item) => {
-  	console.log(item)
     if (window.confirm("Are You Sure Want To Delete This Role") === true) {
       API.delete(`/user-roles/delete/${item.User_Role_ID}`,{
         header: {
@@ -89,11 +97,15 @@ const UserRolesSearch = () => {
         }
       })
       .then(function(response) {
-        // console.log(response);
+        if(response.status === 200)
+				  swal("Record Deleted!","", "success");
         getUserRoles();
       })
       .catch(function(error) {
         console.log(error);
+        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+					swal("Deletion Failed!",error.message, "error");
+ 				}
       });
     } else {
       return;

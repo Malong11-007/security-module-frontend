@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button'
 const SearchBar = (props) => {
 
 	return (
-		<div style={{margin:'10px 0'}}>
+		<div style={{margin:'10px 0', padding: '0 10px'}}>
 			 <TextField 
 				style={{width:'93%'}}
 			 	id="standard-name" 

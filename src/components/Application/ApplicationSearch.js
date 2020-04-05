@@ -7,6 +7,7 @@ import ApplicationForm from './ApplicationForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const ApplicationSearch = () => {
   const [Application,setApplication] = useState([]);
@@ -94,11 +95,15 @@ const ApplicationSearch = () => {
         }
       })
       .then(function(response) {
-        console.log(response);
+        if(response.status === 200)
+				  swal("Record Deleted!","", "success");
         getApplications();
       })
       .catch(function(error) {
         console.log(error);
+        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+					swal("Deletion Failed!",error.message, "error");
+ 				}
       });
     } else {
       return;

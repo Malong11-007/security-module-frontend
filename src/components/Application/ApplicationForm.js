@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux';
 import API from "../../baseURL"; 
 import TextField from '@material-ui/core/TextField';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import moment from 'moment';
@@ -56,7 +58,7 @@ const ApplicationForm = (props) => {
       data.Application_Name === Application_Name &&
       data.Application_Short_Name === Application_Short_Name &&
       data.Application_Desc === Application_Desc &&
-      data.Enabled_Flag === Enabled_Flag
+      (data.Enabled_Flag === true ? 1 : "Y") === Enabled_Flag
     ) {
       alert("No Data Change To Be Noted");
       return;
@@ -124,7 +126,6 @@ const ApplicationForm = (props) => {
 				  {errors.Application_Name && errors.Application_Name.type === "maxLength" && (
 				    <p className="form_error"> Maximum Length Allowed is 250 </p>
 				  )}
-				  <br />
 
 				  <TextField
 				    id="standard-search"
@@ -150,7 +151,6 @@ const ApplicationForm = (props) => {
 				      <p className="form_error"> Maximum Length Allowed is 250 </p>
 				    )}
 
-				  <br />
 
 				  <TextField
 				    id="standard-search"
@@ -172,27 +172,24 @@ const ApplicationForm = (props) => {
 				    <p className="form_error"> Maximum Length Allowed is 250 </p>
 				  )}
 
-				  <br />
-				  <div className="checkbox">
-				    <input
-				      name="Enabled_Flag"
-				      defaultChecked={
-				        props.type === "update"
-				          ? props.record.Enabled_Flag === "1"
-				            ? true
-				            : false
-				          : false
-				      }
-				      type="checkbox"
-				      id="checkbox1"
-				      className="checkbox__input"
-				      ref={register}
-				    />
-				    <label htmlFor="checkbox1" className="checkbox__label">
-				      Enabled Flag
-				    </label>
-				  </div>
-
+					<FormControlLabel
+		        control={
+		          <Checkbox
+		          	inputRef={register}
+		          	defaultChecked={
+		              props.type === "update"
+		                ? props.record.Enabled_Flag === "1"
+		                  ? true
+		                  : false
+		                : false
+		            }
+		            name="Enabled_Flag"
+		            color="primary"
+		          />
+		        }
+		        label="Enable Flag"
+		      />
+		      
 				  <div>
 				    <Button color="primary" variant="contained" type="submit">
 				      {props.type === "insert" ? "Register" : "Update"}

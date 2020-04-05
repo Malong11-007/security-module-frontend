@@ -8,6 +8,7 @@ import RolesModulesForm from './RolesModulesForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
 import { customStyles } from '../../style.js'
+import swal from 'sweetalert';
 
 const RolesFormsSearch = () => {
 	const { Organization_ID } = useSelector(state => state.user)
@@ -20,12 +21,12 @@ const RolesFormsSearch = () => {
   const [search,setSearch] = useState('');
 
   const columns = [
- 	 {
-      Header: 'Role Module ID',
+ 	  {
+      Header: 'ID',
       accessor: 'Role_Module_ID',
       sortable: true,
       filterable: false,
-      maxWidth: 100
+      width: 100
     },
     {
       Header: 'Role Name',
@@ -44,10 +45,11 @@ const RolesFormsSearch = () => {
       accessor: 'Enabled_Flag',
       sortable: true,
       filterable: false,
-      
+      width:120,
     },
     {
       Header: 'Actions',
+      width: 200,
       Cell : props => { 
         return(
           <div style={{ textAlign: "center" }}>
@@ -90,19 +92,22 @@ const RolesFormsSearch = () => {
   }
 
   const onDelete = (item) => {
-  	console.log(item)
     if (window.confirm("Are You Sure Want To Delete This Role") === true) {
-      API.delete(`/roles-modules/delete/${item.Role_Form_ID}`,{
+      API.delete(`/roles-modules/delete/${item.Role_Module_ID}`,{
         header: {
           "Content-Type": "application/json"
         }
       })
       .then(function(response) {
-        console.log(response);
+        if(response.status === 200)
+				  swal("Record Deleted!","", "success");
         getRolesModules();
       })
       .catch(function(error) {
         console.log(error);
+        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+					swal("Deletion Failed!",error.message, "error");
+ 				}
       });
     } else {
       return;
