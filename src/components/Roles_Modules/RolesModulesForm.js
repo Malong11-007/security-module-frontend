@@ -11,7 +11,7 @@ import moment from 'moment';
 import swal from 'sweetalert';
 
 const RolesForm = (props) => {
-	const { Organization_ID } = useSelector(state => state.user)
+	const { Organization_ID, User_ID } = useSelector(state => state.user)
   const { register, errors, handleSubmit, setValue } = useForm({
 	  defaultValues: {
 	    "Module_ID": props.type === 'update' ? props.record.Module_ID : "",
@@ -58,11 +58,11 @@ const RolesForm = (props) => {
 		/* Additional Values to Form */
 		data = {
 			...data,
-			Organization_ID: 1,
+			Organization_ID,
 			Enabled_Flag:data.Enabled_Flag === true ? "1" : "Y",
-			Created_By: 1,
+			Created_By: User_ID,
 			Creation_Date: currentDate.format('YYYY-MM-DD'),
-			Last_Updated_By: 1,
+			Last_Updated_By: User_ID,
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
 		}
 		console.log(data);
@@ -106,7 +106,7 @@ const RolesForm = (props) => {
 		data = {
   		...data,
   		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
-			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_By: User_ID, // temp Changed With User_ID
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
   	}
 

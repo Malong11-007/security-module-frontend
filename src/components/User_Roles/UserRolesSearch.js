@@ -74,7 +74,7 @@ const UserRolesSearch = () => {
  
   const getUserRoles = () => {
   	// `/user-roles/get/${Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}`
-    API.get(`/user-roles/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/user-roles/get/${Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }

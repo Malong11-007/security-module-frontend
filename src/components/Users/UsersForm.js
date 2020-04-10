@@ -12,7 +12,7 @@ import moment from 'moment';
 const UsersForm = (props) => {
   const { register, errors,  handleSubmit } = useForm()
   let currentDate = moment();
-	const { Organization_ID, User_ID } = useSelector(state => state.user)
+	const { Organization_ID, User_ID, Branch_ID } = useSelector(state => state.user)
 
   const onSubmit = data => {
     if (props.type === "insert") {
@@ -31,12 +31,12 @@ const UsersForm = (props) => {
 			Last_Host_ID: 'none',
 			HostID_at_Time_Locked: 'none',
 			Account_Locked_Flag: data.Account_Locked_Flag === true ? "1" : "Y",
-			Branch_ID: 1,
-			Organization_ID: 1,
+			Branch_ID,
+			Organization_ID,
 			Enabled_Flag:data.Enabled_Flag === true ? "1" : "Y",
-			Created_By: 1,
+			Created_By: User_ID,
 			Creation_Date: currentDate.format('YYYY-MM-DD'),
-			Last_Updated_By: 1,
+			Last_Updated_By: User_ID,
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
 		}
 
@@ -89,7 +89,7 @@ const UsersForm = (props) => {
   		...data,
   		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
   		Account_Locked_Flag: data.Account_Locked_Flag === true ? '1' : 'Y',
-			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_By: User_ID, // temp Changed With User_ID
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
   	}
 

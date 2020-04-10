@@ -1,7 +1,8 @@
 import { types } from '../actions/PO_Actions.js';
 
 const defaultState = {
-  lines:[]
+  lines:[],
+  headerDetails:{}
 }
 
 const PO_Reducer = (state = defaultState, {type,payload}) => {
@@ -13,20 +14,50 @@ const PO_Reducer = (state = defaultState, {type,payload}) => {
   		}
   	}
 
+    case types.FILL_TABLE: {
+      return {
+        ...state,
+        lines: [...payload]
+      }
+    }
+    
+
     case types.EDIT_LINE: { // to be done
       return {
-        ...state
+        ...state,
+        lines: state.lines.map((line,index) => {
+          if(index === payload.index){
+            return { ...line, ...payload.data }
+          }
+          return line;
+        })
       }
     }
 
-    case types.REMOVE_LINE: {
+    case types.REMOVE_LINE: { // payload is index of item
       return {
         ...state,
-        lines: state.lines.filter(line => line.Item_ID !== payload)
+        lines: state.lines.filter((v,i)=>i!==payload)
       }
     } 
 
     case types.CLEAR_LINES: {
+      return {
+        ...state,
+        lines:[]
+      }
+    } 
+
+    case types.SET_HEADER: {
+      return {
+        ...state,
+        headerDetails:{
+          ...payload
+        }
+      }
+    } 
+
+    case types.REMOVE_HEADER: {
       return {
         ...defaultState
       }

@@ -1,4 +1,5 @@
 import React,{ useState, useEffect } from 'react'
+import { useSelector } from 'react-redux';
 import API from '../../baseURL';
 import CustomPagination from '../Pagination';
 import ReactTable from 'react-table-6';
@@ -11,6 +12,7 @@ import swal from 'sweetalert';
 
 const UsersSearch = () => {
   const [Users,setUsers] = useState([]);
+	const { Organization_ID } = useSelector(state => state.user)
   const [showModalUpdate,setShowModalUpdate] = useState(false);
   const [showModalInsert,setShowModalInsert] = useState(false);
   const [rowCount,setRowCount] = useState(10);
@@ -62,15 +64,15 @@ const UsersSearch = () => {
       filterable: false,
     },
     {
-      Header: 'Enabled Flag',
+      Header: 'EF',
       accessor: 'Enabled_Flag',
       sortable: true,
       filterable: false,
-      width:120
+      width:60
     },
     {
       Header: 'Actions',
-      width:200,
+      width:150,
       Cell : props => {
       	return(
         <div style={{ textAlign: "center" }}>
@@ -94,7 +96,7 @@ const UsersSearch = () => {
   ]
  
   const getUsers = () => {
-    API.get(`/users/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/users/get/${Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }

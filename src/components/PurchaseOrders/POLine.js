@@ -2,17 +2,20 @@ import React,{ useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import ReactTable from 'react-table-6';
 import ReactModal from 'react-modal';
+import API from "../../baseURL";
 import Button from '@material-ui/core/Button';
-import POModal from './PO_Modal';
+import POModal from './POModal';
 import { customStyles } from '../../style.js';
 import { remove_line } from '../../actions/PO_Actions.js';
 
 
 const PurchaseOrderLine = (props) => {
+	const { editable } = props;
 	const dispatch = useDispatch();
 	const { lines } = useSelector(state => state.PO)
 	const [modal,showModal] = useState(false);
-	
+	const [updateModal,showUpdateModal] = useState(false);
+	const [record,setRecord] = useState();
 	// initializer
   useEffect(() => { 
     ReactModal.setAppElement('body')
@@ -34,7 +37,7 @@ const PurchaseOrderLine = (props) => {
     },
     {
       Header: "QUANTITY",
-      accessor: "quantity",
+      accessor: "Item_Qty",
       sortable: true,
       filterable: false
     },
@@ -57,18 +60,6 @@ const PurchaseOrderLine = (props) => {
       filterable: false
     },
     {
-      Header: "W.H.T %",
-      accessor: "WHT_Per",
-      sortable: true,
-      filterable: false
-    },
-    {
-      Header: "W.H.T Amt",
-      accessor: "WHT_Per",
-      sortable: true,
-      filterable: false
-    },
-    {
       Header: "TOTAL AMOUNT",
       accessor: "Total_Amt",
       sortable: true,
@@ -78,16 +69,54 @@ const PurchaseOrderLine = (props) => {
       Header: 'Actions',
       Cell : props => { 
         return(
-        	<i
-						className="fas fa-trash table_buttons table_delete"
-						onClick={() => dispatch(remove_line(props.original.Item_ID))}
-					></i>
+        	editable ?
+        	<div style={{ textAlign: "center" }}>
+        		{console.log(props)}
+	        	<i
+							className="fas fa-edit table_buttons table_edit"
+							onClick={() => {
+								setRecord({...props.original,index:props.index});
+								console.log(props.original)
+								showUpdateModal(true)
+							}}
+						></i>
+	        	<i
+							className="fas fa-trash table_buttons table_delete"
+							onClick={() => onDelete(props)}
+						></i>
+					</div> :
+					<div style={{ textAlign: "center" }}>*</div>
         )      
       },
       sortable: true,
       filterable: false,
     }
   ]
+
+  const onDelete = (item) => {
+  	const { PO_Line_ID } = item.original;
+  	const { index } = item;
+    if (window.confirm("Item will be removed permenantly. Are you sure you want to delete?") === true) {
+    	if(item.original.hasOwnProperty('PO_Line_ID')){
+		    API.delete(`/purchase-order/delete/line/${PO_Line_ID}`,{
+		      header: {
+		        "Content-Type": "application/json"
+		      }
+		    })
+		    .then(function(response) {
+		      dispatch(remove_line(index))
+		    })
+		    .catch(function(error) {
+		      console.log(error);
+		    });
+    	} else {
+    		dispatch(remove_line(index))
+    	}
+    } else {
+      return;
+    }
+  }
+
   return (
     <div>
       
@@ -95,6 +124,7 @@ const PurchaseOrderLine = (props) => {
         <Button 
           variant="outlined" 
           color="primary"
+          disabled={!editable}
           onClick={() => showModal(true)}
         >
           <i className="fas fa-plus" style={{ marginRight: "5px" }}></i>
@@ -123,7 +153,23 @@ const PurchaseOrderLine = (props) => {
           className="fas fa-times table_buttons modal_cross"
           onClick={() => showModal(false)}
         ></i>
-      	<POModal/>
+      	<POModal type='insert' close={showModal}/>
+      </ReactModal>
+
+      <ReactModal
+      	isOpen={updateModal}
+        shouldCloseOnOverlayClick={false}
+        onRequestClose={() => {
+          showUpdateModal(false)
+        }}
+        style={customStyles}
+        ariaHideApp={true}
+      >
+      	<i
+          className="fas fa-times table_buttons modal_cross"
+          onClick={() => showUpdateModal(false)}
+        ></i>
+      	<POModal type='update' record={record} close={showUpdateModal}/>
       </ReactModal>
 
 	   

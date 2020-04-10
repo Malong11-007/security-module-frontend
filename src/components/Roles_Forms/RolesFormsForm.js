@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from 'react-hook-form'
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import API from "../../baseURL"; 
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
 import Button from '@material-ui/core/Button';
 import moment from 'moment';
 import swal from 'sweetalert';
 
 const RolesFormsForm = (props) => {
-	const { Organization_ID } = useSelector(state => state.user)
+	const { Organization_ID, User_ID } = useSelector(state => state.user)
   const { register, errors, watch, handleSubmit, setValue } = useForm({
 	  defaultValues: {
 	    "Module_ID": props.type === 'update' ? props.record.Module_ID : "",
@@ -65,11 +63,11 @@ const RolesFormsForm = (props) => {
 		/* Additional Values to Form */
 		data = {
 			...data,
-			Organization_ID: 1,
+			Organization_ID,
 			Enabled_Flag:data.Enabled_Flag === true ? "1" : "Y",
-			Created_By: 1,
+			Created_By: User_ID,
 			Creation_Date: currentDate.format('YYYY-MM-DD'),
-			Last_Updated_By: 1,
+			Last_Updated_By: User_ID,
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
 		}
 
@@ -86,7 +84,7 @@ const RolesFormsForm = (props) => {
 		})
 		.catch(function(error) {
 			console.log(error);
-			if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+			if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404 || error.response.status === 401){
 				swal("Entry Failed!",error.message, "error");
  			}
 		});
@@ -112,7 +110,7 @@ const RolesFormsForm = (props) => {
 		}
 		data["Enabled_Flag"] = data.Enabled_Flag === true ? "1" : "Y";
 		data["Last_Updated_Date"] = currentDate.format('YYYY-MM-DD HH:mm:ss');
-		data["Last_Updated_By"] = 1;
+		data["Last_Updated_By"] = User_ID;
 
 		API.put(`/roles-forms/update/${Role_Form_ID}`, data, {
 			header: {

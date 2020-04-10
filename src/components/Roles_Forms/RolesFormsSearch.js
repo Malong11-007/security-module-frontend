@@ -1,4 +1,5 @@
 import React,{ useState, useEffect } from 'react'
+import { useSelector } from 'react-redux';
 import API from '../../baseURL';
 import CustomPagination from '../Pagination';
 import ReactTable from 'react-table-6';
@@ -10,6 +11,7 @@ import { customStyles } from '../../style.js'
 import swal from 'sweetalert';
 
 const RolesFormsSearch = () => {
+	const { Organization_ID } = useSelector(state => state.user)
   const [RolesForms,setRolesForms] = useState([]);
   const [showModalUpdate,setShowModalUpdate] = useState(false);
   const [showModalInsert,setShowModalInsert] = useState(false);
@@ -79,13 +81,12 @@ const RolesFormsSearch = () => {
   ]
  
   const getRolesForms = () => {
-    API.get(`/roles-forms/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/roles-forms/get/${Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
     })
     .then(response => {
-      console.log(response.data);
       if(response.data.results !== RolesForms){
         setRolesForms(response.data) 
       }
@@ -110,7 +111,7 @@ const RolesFormsSearch = () => {
       })
       .catch(function(error) {
         console.log(error);
-        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
+        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404 || error.response.status === 401){
 					swal("Deletion Failed!",error.message, "error");
  				}
       });

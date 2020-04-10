@@ -13,16 +13,16 @@ import swal from 'sweetalert';
 const ApplicationForm = (props) => {
   const { register, errors,  handleSubmit } = useForm()
   let currentDate = moment();
-	const { Organization_ID, User_ID } = useSelector(state => state.user)
+	const { User_ID } = useSelector(state => state.user)
 
   const OnInsert = data => { 
     /* Additional Values to Form */
   	data = {
   		...data,
   		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
-  		Created_By: 1, // temp Changed With User_ID
+  		Created_By: User_ID, // temp Changed With User_ID
 			Creation_Date: currentDate.format('YYYY-MM-DD'),
-			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_By: User_ID, // temp Changed With User_ID
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
   	}
 
@@ -67,7 +67,7 @@ const ApplicationForm = (props) => {
     data = {
   		...data,
   		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
-			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_By: User_ID, // temp Changed With User_ID
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
   	}
 

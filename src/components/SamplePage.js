@@ -1,6 +1,6 @@
 import React from 'react'
 import Sidebar from './Sidebar';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import ApplicationSearch from './Application/ApplicationSearch'
 import RolesSearch from './Roles/RolesSearch'
@@ -40,7 +40,6 @@ const formSelector = (form_name) => {
 
 // Sidebar and Search Styling to be done
 const SamplePage = () => {
-	const dispatch = useDispatch();
 	const { formSelected } = useSelector(state => state.user);
 
 	return (

@@ -74,7 +74,7 @@ const RolesFormsSearch = () => {
  
   const getRolesModules = () => {
   	console.log(pageNumber)
-    API.get(`/roles-modules/get/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+    API.get(`/roles-modules/get/${Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }

@@ -7,23 +7,32 @@ import RolesModulesSearch from './components/Roles_Modules/RolesModulesSearch'
 import UserRolesSearch from './components/User_Roles/UserRolesSearch'
 import UsersSearch from './components/Users/UsersSearch'
 import SamplePage from './components/SamplePage';
-import POForm from './components/PurchaseOrders/PO_Form';
+import POForm from './components/PurchaseOrders/POForm';
+import POSearch from './components/PurchaseOrders/POSearch';
 import Login from './components/Login';
 import './App.css';
 import 'react-table-6/react-table.css';
+import API from './baseURL.js';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useSelector, useDispatch } from 'react-redux';
 import { user_logout } from './actions/userActions.js';
-import { clear_lines } from './actions/PO_Actions.js';
+import { clear_lines, remove_header } from './actions/PO_Actions.js';
 
 function App() {
 	const dispatch = useDispatch();
 	const { isLoggedIn } = useSelector(state => state.user);
 
 	const logout = () => {
-		dispatch(user_logout())
-		dispatch(clear_lines())
-		window.location.href = '/login';
+		API.post('/login/logout')
+		.then(response => {
+			if(response.status === 200){
+				console.log(response);
+				dispatch(user_logout())
+				dispatch(clear_lines())
+				dispatch(remove_header())
+				window.location.href = '/login';
+			}
+		})
 	}
 
   return (
@@ -34,15 +43,14 @@ function App() {
         	<Route path="/login" component={Login} />
         	<ProtectedRoute authed={isLoggedIn} path="/dashboard" component={SamplePage} />
         	<Redirect exact to="login" from="/"/>
-          <Route exact path="/po" component={POForm} />
-
+          <Route exact path="/purchaseOrder/:edit/:headerID" component={POForm} />
+          <Route exact path="/purchaseOrder" component={POSearch} />
           <Route exact path="/application" component={ApplicationSearch} />
           <Route exact path="/roles" component={RolesSearch} />
           <Route exact path="/roles-forms" component={RolesFormsSearch} />
           <Route exact path="/roles-modules" component={RolesModulesSearch} />
           <Route exact path="/user-roles" component={UserRolesSearch} />
           <Route exact path="/users" component={UsersSearch} />
-          <Route path="/login" component={Login} />
         </Switch>
       </Router>
     </div>

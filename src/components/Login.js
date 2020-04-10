@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import API from "../baseURL";
 import { user_login } from '../actions/userActions.js'; 
 import { useDispatch } from 'react-redux';
+import swal from 'sweetalert';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -48,12 +49,19 @@ const Login = (props) => {
       },
     })
     .then((response) => {
-      console.log(response);
-      dispatch(user_login(response.data));
+    	console.log(response); 
+
+       dispatch(user_login(response.data));
       props.history.push('/dashboard');
     })
     .catch((error) => {
-      console.log(error);
+      if (
+				error.response.status === 400 ||
+				error.response.status === 403 ||
+				error.response.status === 404
+			) {
+				swal("Login Failed!","Invalid Email or Password", "error");
+			}
       return;
     });
   };

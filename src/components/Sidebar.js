@@ -22,7 +22,7 @@ const Sidebar = (props) => {
 					modules !== null && 
 					modules.map((module,index) => {
 						return (
-							<ExpansionPanel>
+							<ExpansionPanel key={index}>
 				        <ExpansionPanelSummary
 				          aria-controls={`module+${index}`}
 				          id="panel1a-header"
@@ -33,7 +33,7 @@ const Sidebar = (props) => {
 				        	<List>
 					        	{
 					        		forms.filter(form => form.Module_ID === module.Module_ID)
-					        			.map((form,index) => <ListItem key={index} onClick={() => dispatch(select_form(form.Form_Name))}>{form.Form_Name}</ListItem>)
+					        			.map((form,index) => <ListItem key={index} className="sidebarItems" onClick={() => dispatch(select_form(form.Form_Name))}>{form.Form_Name}</ListItem>)
 					        	}
 				        	</List>
 				        </ExpansionPanelDetails>

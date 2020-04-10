@@ -7,7 +7,7 @@ const SearchBar = (props) => {
 	return (
 		<div style={{margin:'10px 0', padding: '0 10px'}}>
 			 <TextField 
-				style={{width:'93%'}}
+				style={{width:'90%'}}
 			 	id="standard-name" 
 			 	label="Search ..." 
 			 	value={props.search} 

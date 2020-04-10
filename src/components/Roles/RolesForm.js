@@ -28,11 +28,11 @@ const RolesForm = (props) => {
 
 		data = {
   		...data,
-  		Organization_ID : 1, // Organization_ID from redux
+  		Organization_ID, // Organization_ID from redux
   		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
-  		Created_By: 1, // temp Changed With User_ID
+  		Created_By: User_ID, // temp Changed With User_ID
 			Creation_Date: currentDate.format('YYYY-MM-DD'),
-			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_By: User_ID, // temp Changed With User_ID
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
   	}
 
@@ -75,7 +75,7 @@ const RolesForm = (props) => {
     data = {
   		...data,
   		Enabled_Flag: data.Enabled_Flag === true ? '1' : 'Y',
-			Last_Updated_By: 1, // temp Changed With User_ID
+			Last_Updated_By: User_ID, // temp Changed With User_ID
 			Last_Updated_Date: currentDate.format('YYYY-MM-DD HH:mm:ss')
   	}
 

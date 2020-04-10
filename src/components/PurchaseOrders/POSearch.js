@@ -1,62 +1,108 @@
 import React,{ useState, useEffect } from 'react'
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import API from '../../baseURL';
 import CustomPagination from '../Pagination';
 import ReactTable from 'react-table-6';
 import ReactModal from 'react-modal';
-import RolesForm from './RolesForm';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
-import { customStyles } from '../../style.js'
+import { set_header, fill_table, clear_lines, remove_header } from '../../actions/PO_Actions.js'
 import swal from 'sweetalert';
+import moment from 'moment';
 
-const RolesSearch = () => {
-  const [Roles,setRoles] = useState([]);
-  const { Organization_ID } = useSelector(state => state.user)
-  const [showModalUpdate,setShowModalUpdate] = useState(false);
-  const [showModalInsert,setShowModalInsert] = useState(false);
+const POSearch = () => {
+  const dispatch = useDispatch();
+  const [PO,setPO] = useState([]);
+  // const { Organization_ID } = useSelector(state => state.user)
   const [rowCount,setRowCount] = useState(10);
   const [pageNumber,setPageNumber] = useState(1);
-  const [record,setRecord] = useState();
   const [search,setSearch] = useState('');
 
   const columns = [
     {
-      Header: 'Role Name',
-      accessor: 'Role_Name',
+      Header: 'PO Number',
+      accessor: 'PO_NO',
       sortable: true,
       filterable: false,
     },
     {
-      Header: 'Role Description',
-      accessor: 'Role_Desc',
+      Header: 'PO Date',
+      id : 'PO_Date',
+      accessor: d => `${moment(d.PO_Date).format('YYYY-MM-DD')}`,
       sortable: true,
       filterable: false,
+      width:100
+    },
+    {
+      Header: 'Supplier',
+      accessor: 'Supplier_Name',
+      sortable: true,
+      filterable: false,
+    },
+    {
+      Header: 'Department',
+      accessor: 'Department_Name',
+      sortable: true,
+      filterable: false,
+    },
+    {
+      Header: 'Payment',
+      accessor: 'Payment_Type',
+      sortable: true,
+      filterable: false,
+      width:120
+    },
+    {
+      Header: 'Ref No',
+      accessor: 'Ref_No',
+      sortable: true,
+      filterable: false,
+      width:100
+    },
+    {
+      Header: 'Status',
+      accessor: 'Status',
+      sortable: true,
+      filterable: false,
+      width: 100
     },
     {
       Header: 'Enabled Flag',
       accessor: 'Enabled_Flag',
       sortable: true,
       filterable: false,
-      width: 120
+      width: 100
     },
     {
         Header: 'Actions',
-        width: 200,
+        width: 120,
         Cell : props =>
         {return(
           <div style={{ textAlign: "center" }}>
 						<i
 							className="fas fa-edit table_buttons table_edit"
 							onClick={() => {
-								setRecord(props.original);
-								setShowModalUpdate(true);
+								dispatch(set_header(props.original));
+                // console.log(props.original)
+                API.get(`/purchase-order/get/line/${props.original.PO_Header_ID}`)
+                  .then(response => {
+                    console.log(response);
+                    dispatch(fill_table(response.data))
+                    window.open(`/purchaseOrder/true/${props.original.PO_Header_ID}`,'_blank')
+                  })
+                  .catch(err => {
+                    console.log(err);
+                  })
 							}}
 						></i>
-						<i
-							className="fas fa-trash table_buttons table_delete"
-							onClick={() => onDelete(props.original)}
-						></i>
+            {
+              props.original.Enabled_Flag !== '1' &&
+              <i
+                className="fas fa-trash table_buttons table_delete"
+                onClick={() => onDelete(props.original)}
+              ></i>
+            }
+
 					</div>
           )      
         },
@@ -65,17 +111,17 @@ const RolesSearch = () => {
       }
   ]
  
-  const getRoles = () => {
-  	/* `/roles/get/4{Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` */
-    API.get(`/roles/get/${Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
+  const getPO = () => {
+  	/* `/PO/get/4{Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` */
+    API.get(`/purchase-order/get/header/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
       headers:{
         "Content-Type" : "application/json"
       }
     })
     .then(response => {
       // console.log(responce.data);
-      if(response.data.results !== Roles){
-        setRoles(response.data) 
+      if(response.data.results !== PO){
+        setPO(response.data) 
       }
       // console.log(response.data.results)
     })
@@ -86,7 +132,7 @@ const RolesSearch = () => {
 
   const onDelete = (item) => {
     if (window.confirm("Are You Sure Want To Delete This Role") === true) {
-      API.delete(`/roles/delete/${item.Role_ID}`,{
+      API.delete(`/purchase-order/delete/${item.PO_Header_ID}`,{
         header: {
           "Content-Type": "application/json"
         }
@@ -94,7 +140,7 @@ const RolesSearch = () => {
       .then(function(response) {
         if(response.status === 200)
 				  swal("Record Deleted!","", "success");
-        getRoles();
+        getPO();
       })
       .catch(function(error) {
         console.log(error);
@@ -111,13 +157,12 @@ const RolesSearch = () => {
 	// initializer
   useEffect(() => { 
     ReactModal.setAppElement('body')
-    getRoles()
+    getPO()
   },[]) // eslint-disable-line
 
   //Checks for change in rowCount and PageNumber
   useEffect(() => {
-  	// console.log(Application)
-  	getRoles()
+  	getPO()
   }, [rowCount,pageNumber]) // eslint-disable-line
 
   //search bar change handler
@@ -131,16 +176,20 @@ const RolesSearch = () => {
         <Button 
           variant="outlined" 
           color="primary"
-          onClick={() => setShowModalInsert(true)}
+          onClick={() => {
+            dispatch(remove_header());
+            dispatch(clear_lines());
+            window.open('/purchaseOrder/false/null','_blank')
+          }}           
         >
           <i className="fas fa-plus" style={{ marginRight: "5px" }}></i>
           Create
         </Button>
       </div>
 
-      <SearchBar search={search} handleChange={handleChange} onSearch={getRoles}/>
+      <SearchBar search={search} handleChange={handleChange} onSearch={getPO}/>
       <ReactTable
-        data={Roles.results}
+        data={PO.results}
         columns={columns}
         noDataText={"Loading..."}
         showPagination={false}
@@ -155,64 +204,15 @@ const RolesSearch = () => {
       	setRowCount={setRowCount}
       	pageNumber={pageNumber}
       	setPageNumber={setPageNumber}
-      	totalPages={Roles.totalPages}
-      	newPage={getRoles}
+      	totalPages={PO.totalPages}
+      	newPage={getPO}
       />
 
       {/* Modal for Update */}
-      <ReactModal
-        isOpen={showModalUpdate}
-        shouldCloseOnOverlayClick={false}
-        onRequestClose={() => {
-          setShowModalUpdate(false);
-          setRecord(null);
-          getRoles();
-        }}
-        style={customStyles}
-        ariaHideApp={true}
-      >
-        <div>
-          <i
-            className="fas fa-times table_buttons modal_cross"
-            onClick={() => setShowModalUpdate(false)}
-          ></i>
-          <RolesForm
-            type="update"
-            record={record}
-            onClose={setShowModalUpdate}
-            getRoles={getRoles}
-          />
-          
-        </div>
-      </ReactModal>
-      
-      {/* Modal for Insert */}
-      <ReactModal
-        isOpen={showModalInsert}
-        shouldCloseOnOverlayClick={false}
-        onRequestClose={() => {
-          setShowModalInsert(false);
-          getRoles();
-        }}
-        style={customStyles}
-        ariaHideApp={true}
-      >
-        <div>
-          <i
-            className="fas fa-times table_buttons modal_cross"
-            onClick={() => setShowModalInsert(false)}
-          ></i>
-          <RolesForm
-            type="insert"
-            onClose={setShowModalInsert}
-            getRoles={getRoles}
-          />
-        </div>
-      </ReactModal> 
     </div>
   )
 }
 
 
 
-export default RolesSearch
+export default POSearch

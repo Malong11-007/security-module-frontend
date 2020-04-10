@@ -163,3 +163,12 @@ input[type="date"],input[type="datetime-local"]:valid::before { display: none }
   color: #0056b2;
 }
 
+/* sidebar items */
+
+.sidebarItems:hover{
+  cursor: pointer;
+  border: 2px solid #4252a7;
+  font-weight: bold;
+  border-radius: 5px;
+  background: #f0f0f0;
+}
