@@ -8,7 +8,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { useDispatch } from 'react-redux';
 import { add_line, edit_line } from '../../actions/PO_Actions.js';
 import moment from "moment";
-
+import swal from 'sweetalert';
 
 const PurchaseInsertModal = (props) => {
 	const dispatch = useDispatch();
@@ -24,9 +24,6 @@ const PurchaseInsertModal = (props) => {
 	const [ready,setReady] = useState(false);
 	const currentDate = moment();
 
-	// useEffect(() => {
-	// 	console.log(values)
-	// }, [values])
 
 	useEffect(() => { /* Intialize the value for AutoComplete InputBox*/
     register({ name: "Item_ID"}, {required: true});
@@ -84,6 +81,15 @@ const PurchaseInsertModal = (props) => {
 					newLine.Total_Amt = (+newLine.GST_Amt + +Price) * Item_Qty;
 					newLine.UOM_Name = response.data.UOM_Name;
 					dispatch(add_line(newLine))
+					swal('New Item Added',`${Item_Name}`,'success')
+					setValue([
+						{"Item_ID": ""},
+						{"Item_Name": ""},
+						{"Price":""},
+						{"UOM_ID": ""},
+						{"Item_Qty": ""},
+						{"GST_Per": ""}
+					])
 				})
 				.catch(err => {
 					console.log(err)

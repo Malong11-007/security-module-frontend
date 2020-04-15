@@ -43,11 +43,11 @@ const PurchaseOrderHeader = (props) => {
 		{ title: "PayOrder" },
 	];
 
-	useEffect(() => {
+	useEffect(() => { // whenever there is change in header update HeaderInfo in POForm
 		props.sendHeaderInfo(header);
 	}, [header]); // eslint-disable-line
 
-	useEffect(() => {
+	useEffect(() => { // Initializer
 		ReactModal.setAppElement("body");
 		axios.all([
 			API.get(`/supplier/1`),API.get("/department/1")
@@ -62,14 +62,6 @@ const PurchaseOrderHeader = (props) => {
 		})
 	}, []); // eslint-disable-line
 
-
-	/* Date Handler */
-	const handleDateChange = (date) => {
-		setHeader({
-			...header,
-			PO_Date: date,
-		});
-	};
 
 	return (
 		ready &&
@@ -91,7 +83,6 @@ const PurchaseOrderHeader = (props) => {
 					label="P.O Number"
 				/>
 			}
-			
 
 			<MuiPickersUtilsProvider utils={DateFnsUtils}>
 				<KeyboardDatePicker
@@ -103,7 +94,7 @@ const PurchaseOrderHeader = (props) => {
 					id="PO_Date"
 					label="P.O Date"
 					value={header.PO_Date}
-					onChange={handleDateChange}
+					onChange={date => setHeader({...header,PO_Date: date})}
 					KeyboardButtonProps={{
 						"aria-label": "change date",
 					}}
@@ -117,7 +108,7 @@ const PurchaseOrderHeader = (props) => {
 				getOptionLabel={(option) => option.Supplier_Name}
 				defaultValue={props.edit ? suppliers.find(supplier => supplier.Supplier_Name === props.data.Supplier_Name) : {}}
 				onChange={(event, values) =>
-					setHeader({ ...header, Supplier_ID: values.Supplier_ID })
+					setHeader({ ...header, Supplier_ID: values && values.Supplier_ID })
 				}
 				style={{ marginBottom: "5px", width: "70%", margin: "0 15%" }}
 				renderInput={(params) => <TextField {...params} label="Supplier" />}
@@ -131,7 +122,7 @@ const PurchaseOrderHeader = (props) => {
 				defaultValue={props.edit ? PaymentType.find(item => item.title === props.data.Payment_Type) : {}}
 				style={{ marginBottom: "20px", width: "70%", margin: "0 15%" }}
 				onChange={(event, values) =>
-					setHeader({ ...header, Payment_Type: values.title })
+					setHeader({ ...header, Payment_Type: values && values.title })
 				}
 				renderInput={params => {
           return (
@@ -151,7 +142,7 @@ const PurchaseOrderHeader = (props) => {
 				getOptionLabel={(option) => option.Department_Name || ""}
 				defaultValue={props.edit ? departments.find(department => department.Department_Name === props.data.Department_Name) : {}}
 				onChange={(event, values) =>
-					setHeader({ ...header, Ship_To_ID: values.Department_ID })
+					setHeader({ ...header, Ship_To_ID: values && values.Department_ID })
 				}
 				style={{ marginBottom: "5px", width: "70%", margin: "0 15%" }}
 				renderInput={(params) => (

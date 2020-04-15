@@ -28,12 +28,12 @@ const PO_Form = (props) => {
 	}, [lines]) // eslint-disable-line
  
  	const getHeaderInfo = (header) => {
+ 		console.log(header)
  		setHeader(header)
  	}
 
  	const onSubmitPO = (submitType) => {
 		if (edit === "true") {
-			console.log(header);
 			if (lines.length > 0) {
 				API.put(`/purchase-order/update/${headerID}/${submitType}`, {
 					header,
@@ -65,7 +65,6 @@ const PO_Form = (props) => {
 				swal("Empty Form!");
 			}
 		} else {
-			console.log(header);
 			if (
 				header.hasOwnProperty('Supplier_ID') &&
 				header.hasOwnProperty('Ship_To_ID') &&

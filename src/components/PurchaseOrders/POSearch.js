@@ -6,8 +6,8 @@ import ReactTable from 'react-table-6';
 import ReactModal from 'react-modal';
 import Button from '@material-ui/core/Button';
 import SearchBar from '../SearchBar.js';
+import { onDelete, fetchData } from '../../util.js';
 import { set_header, fill_table, clear_lines, remove_header } from '../../actions/PO_Actions.js'
-import swal from 'sweetalert';
 import moment from 'moment';
 
 const POSearch = () => {
@@ -17,7 +17,7 @@ const POSearch = () => {
   const [rowCount,setRowCount] = useState(10);
   const [pageNumber,setPageNumber] = useState(1);
   const [search,setSearch] = useState('');
-
+  const url = `/purchase-order/get/header/1?limit=${rowCount}&page=${pageNumber}&search=${search}`;
   const columns = [
     {
       Header: 'PO Number',
@@ -96,13 +96,17 @@ const POSearch = () => {
 							}}
 						></i>
             {
-              props.original.Enabled_Flag !== '1' &&
-              <i
-                className="fas fa-trash table_buttons table_delete"
-                onClick={() => onDelete(props.original)}
-              ></i>
+              props.original.Enabled_Flag !== "1" && (
+                <i
+                  className="fas fa-trash table_buttons table_delete"
+                  onClick={() => {
+                    const deleteUrl = `/purchase-order/delete/${props.original.PO_Header_ID}`;
+                    const callback = function(){ fetchData(url,setPO); }
+                    onDelete(deleteUrl,callback)
+                  }}
+                ></i>
+              )
             }
-
 					</div>
           )      
         },
@@ -110,65 +114,17 @@ const POSearch = () => {
       filterable: false,
       }
   ]
- 
-  const getPO = () => {
-  	/* `/PO/get/4{Organization_ID}?limit=${rowCount}&page=${pageNumber}&search=${search}` */
-    API.get(`/purchase-order/get/header/1?limit=${rowCount}&page=${pageNumber}&search=${search}` , {
-      headers:{
-        "Content-Type" : "application/json"
-      }
-    })
-    .then(response => {
-      // console.log(responce.data);
-      if(response.data.results !== PO){
-        setPO(response.data) 
-      }
-      // console.log(response.data.results)
-    })
-    .catch(err => {
-      console.log(err);
-    })
-  }
-
-  const onDelete = (item) => {
-    if (window.confirm("Are You Sure Want To Delete This Role") === true) {
-      API.delete(`/purchase-order/delete/${item.PO_Header_ID}`,{
-        header: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(function(response) {
-        if(response.status === 200)
-				  swal("Record Deleted!","", "success");
-        getPO();
-      })
-      .catch(function(error) {
-        console.log(error);
-        if(error.response.status === 400 ||error.response.status === 403 || error.response.status === 404){
-					swal("Deletion Failed!",error.message, "error");
- 				}
-      });
-
-    } else {
-      return;
-    }
-  }
 
 	// initializer
   useEffect(() => { 
     ReactModal.setAppElement('body')
-    getPO()
+    fetchData(url,setPO);
   },[]) // eslint-disable-line
 
-  //Checks for change in rowCount and PageNumber
+  /* Checks for change in rowCount and PageNumber */
   useEffect(() => {
-  	getPO()
+  	fetchData(url,setPO);
   }, [rowCount,pageNumber]) // eslint-disable-line
-
-  //search bar change handler
-  const handleChange = event => {
-    setSearch(event.target.value);
-  };
 
   return (
     <div>
@@ -187,7 +143,11 @@ const POSearch = () => {
         </Button>
       </div>
 
-      <SearchBar search={search} handleChange={handleChange} onSearch={getPO}/>
+      <SearchBar 
+        search={search} 
+        handleChange={e => setSearch(e.target.value)} 
+        onSearch={() => fetchData(url,setPO)}
+      />
       <ReactTable
         data={PO.results}
         columns={columns}
@@ -205,14 +165,11 @@ const POSearch = () => {
       	pageNumber={pageNumber}
       	setPageNumber={setPageNumber}
       	totalPages={PO.totalPages}
-      	newPage={getPO}
+      	newPage={() => fetchData(url,setPO)}
       />
 
-      {/* Modal for Update */}
     </div>
   )
 }
-
-
 
 export default POSearch

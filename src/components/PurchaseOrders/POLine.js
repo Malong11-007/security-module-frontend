@@ -96,7 +96,7 @@ const PurchaseOrderLine = (props) => {
   const onDelete = (item) => {
   	const { PO_Line_ID } = item.original;
   	const { index } = item;
-    if (window.confirm("Item will be removed permenantly. Are you sure you want to delete?") === true) {
+    if (window.confirm("Are you sure you want to delete?. Item Deletes are PERMENANT") === true) {
     	if(item.original.hasOwnProperty('PO_Line_ID')){
 		    API.delete(`/purchase-order/delete/line/${PO_Line_ID}`,{
 		      header: {
@@ -140,7 +140,7 @@ const PurchaseOrderLine = (props) => {
         showPagination={false}
       />
      	
-      <ReactModal
+      <ReactModal // New Modal
       	isOpen={modal}
         shouldCloseOnOverlayClick={false}
         onRequestClose={() => {
@@ -156,7 +156,7 @@ const PurchaseOrderLine = (props) => {
       	<POModal type='insert' close={showModal}/>
       </ReactModal>
 
-      <ReactModal
+      <ReactModal // Update Modal
       	isOpen={updateModal}
         shouldCloseOnOverlayClick={false}
         onRequestClose={() => {

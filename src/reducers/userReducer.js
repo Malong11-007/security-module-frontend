@@ -4,7 +4,7 @@ const defaultState = {
 	isLoggedIn:false,
   User_ID:'',
   User_Name:'',
-  User_Email:'',
+  User_Email:'', 
   Organization_ID:'',
   Branch_ID:'',
   forms:[],
